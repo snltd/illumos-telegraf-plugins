@@ -36,6 +36,7 @@ All of that said, I've found the plugins reliable and useful.
 
 ## The Plugins
 
+
 ### illumos_cpu
 CPU usage, presented in nanoseconds, as per the kstats. It's up to you and
 your graphing software to make rates, percentages, or whatever you find
@@ -74,6 +75,9 @@ Parses the output of `svcs(1m)` to count the number of SMF services in
 particular states. Also reports errant services with sufficient tagging to
 easily track them down and fix them.
 
+### illumos_zfs_arc
+Reports ZFS ARC statistics.
+
 ### illumos_zones
 Turns `zoneadm list` into numbers.
 
@@ -89,13 +93,13 @@ Get the Telegraf source, and in `plugins/input/all/all.go` add a
 bunch of lines like:
 
 ```go
-_ "github.com/snltd/solaris-telegraf-plugins/illumos_io"
-_ "github.com/snltd/solaris-telegraf-plugins/illumos_memory"
-_ "github.com/snltd/solaris-telegraf-plugins/illumos_network"
-_ "github.com/snltd/solaris-telegraf-plugins/illumos_nfs_client"
-_ "github.com/snltd/solaris-telegraf-plugins/illumos_nfs_server"
-_ "github.com/snltd/solaris-telegraf-plugins/illumos_smf"
-_ "github.com/snltd/solaris-telegraf-plugins/illumos_zpool"
+_ "github.com/snltd/illumos-telegraf-plugins/illumos_io"
+_ "github.com/snltd/illumos-telegraf-plugins/illumos_memory"
+_ "github.com/snltd/illumos-telegraf-plugins/illumos_network"
+_ "github.com/snltd/illumos-telegraf-plugins/illumos_nfs_client"
+_ "github.com/snltd/illumos-telegraf-plugins/illumos_nfs_server"
+_ "github.com/snltd/illumos-telegraf-plugins/illumos_smf"
+_ "github.com/snltd/illumos-telegraf-plugins/illumos_zpool"
 ```
 
 Then build Telegraf with `gmake`.
