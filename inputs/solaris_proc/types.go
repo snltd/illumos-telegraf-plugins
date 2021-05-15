@@ -12,7 +12,7 @@ type dev_t uint64
 type size_t uint64
 type uintptr_t uint64
 type ulong_t uint64
-type timestruc_t [2]int64
+type timestruc_t [2]int64 // [seconds, nanoseconds]
 
 type prusage_t struct {
 	Pr_lwpid    id_t           /* lwp id.  0: process or defunct */

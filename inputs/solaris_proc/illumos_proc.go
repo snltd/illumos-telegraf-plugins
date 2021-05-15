@@ -1,7 +1,7 @@
 package illumos_proc
 
 import (
-	//"encoding/binary"
+	"encoding/binary"
 	"fmt"
 
 	"github.com/influxdata/telegraf"
@@ -9,11 +9,11 @@ import (
 	//sh "github.com/snltd/solaris-telegraf-helpers"
 	//"io/ioutil"
 	//"github.com/fatih/structs"
-	//"log"
-	//"os"
+	"log"
+	"os"
 	//"sort"
-	//"strconv"
-	//"strings"
+	"strconv"
+	"strings"
 )
 
 var sampleConfig = `
@@ -34,13 +34,73 @@ func (s *IllumosProc) SampleConfig() string {
 }
 
 type IllumosProc struct {
-	Fields []string
-	Tags   []string
-	TopN   int
+	//Fields []string
+	//Tags   []string
+	//TopN   int
+}
+
+//type procItems map[string]interface{}
+
+var procDir = "/proc" // a var so it can be overridden to use fixtures in testing
+
+func gatherProcInfo(pidList []int) {
+	for _, pid := range pidList {
+		fmt.Println(pid)
+		//x, _ := readProcPsinfo(pid)
+		//fmt.Printf("%#v\n", x)
+		//ioutil.WriteFile(fmt.Sprintf("%d.psinfo", pid), x, 0o644)
+	}
 }
 
 func (s *IllumosProc) Gather(acc telegraf.Accumulator) error {
-	fmt.Printf("merp\n")
+	gatherProcInfo(procPidList())
+
+	// get a list of all proc IDs
+
+	// make a list of all procs from that list
+
+	// sort the procs
+
+	// turn the top 'n' into metrics
+
+	//all_procs := allProcs()
+	//var contract_map map[int]string
+
+	/*
+		if sh.WeWant("svc", s.Tags) {
+			contract_map = contractMap(runSvcsCtidCmd())
+		}
+
+		for _, field := range s.Fields {
+			raw_field := "Pr_" + field
+			procs := leaderboard(all_procs, raw_field, s.TopN)
+
+			for _, proc := range procs {
+				metrics := make(map[string]interface{})
+				tags := make(map[string]string)
+
+				if sh.WeWant("zone", s.Tags) {
+					tags["zone"] = proc.zone
+				}
+
+				if sh.WeWant("pid", s.Tags) {
+					tags["pid"] = strconv.Itoa(proc.pid)
+				}
+
+				if sh.WeWant("name", s.Tags) {
+					tags["name"] = proc.name
+				}
+
+				if sh.WeWant("svc", s.Tags) {
+					tags["svc"] = contract_map[int(proc.ctid)]
+				}
+
+				metrics[field] = proc.value
+				acc.AddFields("solaris_proc", metrics, tags)
+			}
+		}
+	*/
+
 	return nil
 }
 
@@ -54,36 +114,19 @@ type procDigest struct {
 	ts    int64  // nanosecond time stamp, relative to global boot
 }
 
-var procDir = "/proc"
 var zoneMap sh.ZoneMap
 
 // leaderboard() needs these procDigest structs and funcs to sort
 type procDigests []procDigest
-type procItems map[string]interface{}
 
 func (d procDigests) Len() int           { return len(d) }
 func (d procDigests) Swap(i, j int)      { d[i], d[j] = d[j], d[i] }
 func (d procDigests) Less(i, j int) bool { return d[i].value < d[j].value }
-
-func procPidList() []int {
-	procs, err := os.ReadDir(procDir)
-
-	if err != nil {
-		log.Fatal(fmt.Sprintf("cannot read %v", procDir))
-	}
-
-	var ret []int
-
-	for _, proc := range procs {
-		pid, _ := strconv.Atoi(proc.Name())
-		ret = append(ret, pid)
-	}
-
-	return ret
-}
+*/
 
 /////////////////////////////////
 
+/*
 func allProcs() map[int]procItems {
 	procs := procPidList()
 	ret := make(map[int]procItems)
@@ -109,7 +152,9 @@ func allProcs() map[int]procItems {
 	}
 	return ret
 }
+*/
 
+/*
 var runSvcsCtidCmd = func() string {
 	return sh.RunCmd("/bin/svcs -vHo ctid,fmri")
 }
@@ -162,46 +207,6 @@ func zoneLookup(zid id_t) string {
 	// return svc
 // }
 
-func (s *IllumosProc) Gather(acc telegraf.Accumulator) error {
-	all_procs := allProcs()
-	var contract_map map[int]string
-
-	if sh.WeWant("svc", s.Tags) {
-		contract_map = contractMap(runSvcsCtidCmd())
-	}
-
-	for _, field := range s.Fields {
-		raw_field := "Pr_" + field
-		procs := leaderboard(all_procs, raw_field, s.TopN)
-
-		for _, proc := range procs {
-			metrics := make(map[string]interface{})
-			tags := make(map[string]string)
-
-			if sh.WeWant("zone", s.Tags) {
-				tags["zone"] = proc.zone
-			}
-
-			if sh.WeWant("pid", s.Tags) {
-				tags["pid"] = strconv.Itoa(proc.pid)
-			}
-
-			if sh.WeWant("name", s.Tags) {
-				tags["name"] = proc.name
-			}
-
-			if sh.WeWant("svc", s.Tags) {
-				tags["svc"] = contract_map[int(proc.ctid)]
-			}
-
-			metrics[field] = proc.value
-			acc.AddFields("solaris_proc", metrics, tags)
-		}
-	}
-
-	return nil
-}
-
 ///////////////////////////////////////////////////////////////////////
 
 func contractMap(svcsOutput string) map[int]string {
@@ -226,50 +231,89 @@ func contractMap(svcsOutput string) map[int]string {
 	return ret
 }
 
-func procPsinfo(pid int) (psinfo_t, error) {
-	var psinfo psinfo_t
+*/
 
+func procPidList() []int {
+	procs, err := os.ReadDir(procDir)
+
+	if err != nil {
+		log.Fatal(fmt.Sprintf("cannot read %v", procDir))
+	}
+
+	var ret []int
+
+	for _, proc := range procs {
+		pid, _ := strconv.Atoi(proc.Name())
+		ret = append(ret, pid)
+	}
+
+	return ret
+}
+
+// process wink in and out of existence all the time. I think that a process not being found isn't
+// even worth mentioning, but we will return an error
+func readProcPsinfo(pid int) (psinfo_t, error) {
+	var psinfo psinfo_t
 	file := fmt.Sprintf("%s/%d/psinfo", procDir, pid)
 	fh, err := os.Open(file)
 
 	if err != nil {
-		log.Printf("cannot open %s\n", file)
 		return psinfo, err
 	}
 
 	err = binary.Read(fh, binary.LittleEndian, &psinfo)
-
-	if err != nil {
-		log.Printf("cannot read %s\n", file)
-		return psinfo, err
-	}
-
-	return psinfo, nil
+	return psinfo, err
 }
 
-func procUsage(pid int) (prusage_t, error) {
-	file := fmt.Sprintf("%s/%d/usage", procDir, pid)
+func readProcUsage(pid int) (prusage_t, error) {
 	var prusage prusage_t
-
+	file := fmt.Sprintf("%s/%d/usage", procDir, pid)
 	fh, err := os.Open(file)
 
 	if err != nil {
-		log.Printf("cannot open %s\n", file)
 		return prusage, err
 	}
 
 	err = binary.Read(fh, binary.LittleEndian, &prusage)
-
-	if err != nil {
-		log.Printf("cannot read %s\n", file)
-		return prusage, err
-	}
-
 	return prusage, err
 }
 
-*/
+func parseProcData(psinfo psinfo_t, usage prusage_t) (map[string]interface{}, map[string]string) {
+	fields := map[string]interface{}{
+		"size":       float64(psinfo.Pr_size * 1024),   // convert from kb to bytes
+		"rss":        float64(psinfo.Pr_rssize * 1024), // convert from kb to bytes
+		"percentCPU": bpcToPc(psinfo.Pr_pctcpu),
+		"percentMem": bpcToPc(psinfo.Pr_pctmem),
+	}
+
+	fmt.Printf("--------> %#v\n", usage)
+
+	tags := map[string]string{
+		"execname":   strings.Trim(fmt.Sprintf("%s", psinfo.Pr_fname), "\x00"),
+		"args":       strings.Trim(fmt.Sprintf("%s", psinfo.Pr_psargs), "\x00"),
+		"pid":        fmt.Sprintf("%d", psinfo.Pr_pid),
+		"uid":        fmt.Sprintf("%d", psinfo.Pr_uid),
+		"gid":        fmt.Sprintf("%d", psinfo.Pr_gid),
+		"zoneID":     fmt.Sprintf("%d", psinfo.Pr_zoneid),
+		"contractID": fmt.Sprintf("%d", psinfo.Pr_contract),
+	}
+
+	return fields, tags
+}
+
+// Convert one of psinfo's weird "binary fraction" percentage values to an actual percentage
+// value. Method is copied from prstat(1).
+func bpcToPc(binaryFraction ushort_t) float64 {
+	return float64(binaryFraction) * 100 / 0x8000
+}
+
+// timestruc_t is an array of [seconds, nanoseconds]. Combine and convert into seconds
+func tsToSeconds(ts []int64) float64 {
+	return float64(ts[0]*1e9+ts[1]) / 1e9
+}
+
 func init() {
+	fmt.Println()
 	//zoneMap = sh.NewZoneMap()
 	inputs.Add("illumos_proc", func() telegraf.Input { return &IllumosProc{} })
 }

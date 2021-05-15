@@ -1,31 +1,25 @@
 package illumos_proc
 
-/*
 import (
 	//"fmt"
-	"github.com/influxdata/telegraf"
+	//"github.com/influxdata/telegraf"
+	"encoding/gob"
+	"fmt"
 	"github.com/influxdata/telegraf/testutil"
-	//"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	//"os"
+	"os"
 	"testing"
-	"time"
+	//"time"
 )
 
-func TestPlugin(t *testing.T) {
+func _TestPlugin(t *testing.T) {
 	s := &IllumosProc{}
 
 	acc := testutil.Accumulator{}
 	require.NoError(t, s.Gather(&acc))
-
-	testutil.RequireMetricsEqual(
-		t,
-		testMetrics,
-		acc.GetTelegrafMetrics(),
-		testutil.SortMetrics(),
-		testutil.IgnoreTime())
 }
 
+/*
 var testMetrics = []telegraf.Metric{
 	testutil.MustMetric(
 		"merp",
@@ -65,12 +59,82 @@ func TestProcPsinfo(t *testing.T) {
 	assert.Equal(t, psinfo.Pr_uid, uid_t(os.Getuid()))
 	assert.Equal(t, psinfo.Pr_gid, gid_t(os.Getgid()))
 }
+*/
 
-func TestProcPidList(t *testing.T) {
-	procDir = "fixtures/proc"
-	assert.Equal(t, []int{10887, 11022, 8530}, procPidList())
+func TestParseProcInfo(t *testing.T) {
+	t.Parallel()
+
+	var psinfoData psinfo_t
+	var usageData prusage_t
+
+	raw, _ := os.Open("testdata/19230.psinfo")
+	dec := gob.NewDecoder(raw)
+	dec.Decode(&psinfoData)
+
+	raw, _ = os.Open("testdata/19230.usage")
+	dec = gob.NewDecoder(raw)
+	dec.Decode(&usageData)
+
+	fields, tags := parseProcData(psinfoData, usageData)
+
+	require.Equal(
+		t,
+		map[string]interface{}{
+			"percentCPU": float64(0),
+			"percentMem": float64(0.0823974609375),
+			"rss":        float64(14196736),
+			"size":       float64(17248256),
+		},
+		fields,
+	)
+
+	require.Equal(
+		t,
+		map[string]string{
+			"args":       "vi -p illumos_proc_test.go illumos_proc.go types.go",
+			"contractID": "40532",
+			"execname":   "vim",
+			"pid":        "19230",
+			"gid":        "14",
+			"uid":        "264",
+			"zoneID":     "13",
+		},
+		tags,
+	)
 }
 
+func TestReadProcPsinfo(t *testing.T) {
+	// making this parallel fails....
+	actual, err := readProcPsinfo(os.Getpid())
+
+	require.Nil(t, err)
+	require.Equal(t, os.Getpid(), int(actual.Pr_pid))
+	require.Equal(t, os.Getppid(), int(actual.Pr_ppid))
+
+	_, err = readProcPsinfo(0)
+	require.Error(t, err)
+}
+
+func TestReadProcUsage(t *testing.T) {
+	// making this parallel fails....
+	actual, err := readProcUsage(os.Getpid())
+
+	require.Nil(t, err)
+	require.IsType(t, timestruc_t{}, actual.Pr_utime)
+
+	_, err = readProcUsage(0)
+	require.Error(t, err)
+}
+
+func TestProcPidList(t *testing.T) {
+	t.Parallel()
+
+	procDir = "testdata/proc"
+	require.Equal(t, []int{10887, 11022, 8530}, procPidList())
+	fmt.Println("DELETE ME AT THE END")
+}
+
+/*
 func TestZoneLookup(t *testing.T) {
 	assert.Equal(
 		t,
