@@ -6,7 +6,7 @@ import (
 
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/testutil"
-	sth "github.com/snltd/solaris-telegraf-helpers"
+	"github.com/snltd/illumos-telegraf-plugins/helpers"
 	"github.com/stretchr/testify/require"
 )
 
@@ -15,8 +15,8 @@ func TestPlugin(t *testing.T) {
 
 	s := &IllumosZones{}
 
-	makeZoneMap = func() sth.ZoneMap {
-		return sth.ParseZones(zoneadmOutput)
+	makeZoneMap = func() helpers.ZoneMap {
+		return helpers.ParseZones(zoneadmOutput)
 	}
 
 	acc := testutil.Accumulator{}

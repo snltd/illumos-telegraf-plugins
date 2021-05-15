@@ -6,7 +6,7 @@ import (
 
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/inputs"
-	sh "github.com/snltd/solaris-telegraf-helpers"
+	"github.com/snltd/illumos-telegraf-plugins/helpers"
 )
 
 var sampleConfig = `
@@ -28,7 +28,7 @@ func (s *IllumosZpool) SampleConfig() string {
 }
 
 var zpoolOutput = func() string {
-	return sh.RunCmd("/usr/sbin/zpool list")
+	return helpers.RunCmd("/usr/sbin/zpool list")
 }
 
 func (s *IllumosZpool) Gather(acc telegraf.Accumulator) error {
@@ -41,7 +41,7 @@ func (s *IllumosZpool) Gather(acc telegraf.Accumulator) error {
 		tags := map[string]string{"name": poolStats.name}
 
 		for stat, val := range poolStats.props {
-			if sh.WeWant(stat, s.Fields) {
+			if helpers.WeWant(stat, s.Fields) {
 				fields[stat] = val
 			}
 		}
@@ -103,7 +103,7 @@ func parseZpool(raw, rawHeader string) Zpool {
 		case "alloc":
 			fallthrough
 		case "free":
-			pool.props[property], _ = sh.Bytify(field)
+			pool.props[property], _ = helpers.Bytify(field)
 		case "frag":
 			fallthrough
 		case "cap":

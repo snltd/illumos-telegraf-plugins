@@ -6,7 +6,7 @@ import (
 
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/inputs"
-	sh "github.com/snltd/solaris-telegraf-helpers"
+	"github.com/snltd/illumos-telegraf-plugins/helpers"
 )
 
 var sampleConfig = `
@@ -42,11 +42,11 @@ func (s *IllumosFma) SampleConfig() string {
 }
 
 var runFmstatCmd = func() string {
-	return sh.RunCmdPfexec("/usr/sbin/fmstat")
+	return helpers.RunCmdPfexec("/usr/sbin/fmstat")
 }
 
 var runFmadmFaultyCmd = func() string {
-	return sh.RunCmdPfexec("/usr/sbin/fmadm faulty")
+	return helpers.RunCmdPfexec("/usr/sbin/fmadm faulty")
 }
 
 func gatherFmstat(s *IllumosFma, acc telegraf.Accumulator) {
@@ -57,12 +57,12 @@ func gatherFmstat(s *IllumosFma, acc telegraf.Accumulator) {
 		fields := make(map[string]interface{})
 		fmstats := parseFmstatLine(statLine, header)
 
-		if !sh.WeWant(fmstats.module, s.FmstatModules) {
+		if !helpers.WeWant(fmstats.module, s.FmstatModules) {
 			continue
 		}
 
 		for stat, val := range fmstats.props {
-			if sh.WeWant(stat, s.FmstatFields) {
+			if helpers.WeWant(stat, s.FmstatFields) {
 				fields[stat] = val
 			}
 		}
@@ -115,7 +115,7 @@ func parseFmstatLine(fmstatLine string, header []string) Fmstat {
 		case "memsz":
 			fallthrough
 		case "bufsz":
-			props[property], _ = sh.Bytify(field)
+			props[property], _ = helpers.Bytify(field)
 		default:
 			props[property], _ = strconv.ParseFloat(field, 64)
 		}

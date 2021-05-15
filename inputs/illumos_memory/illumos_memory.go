@@ -9,7 +9,7 @@ import (
 	"github.com/illumos/go-kstat"
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/inputs"
-	sth "github.com/snltd/solaris-telegraf-helpers"
+	"github.com/snltd/illumos-telegraf-plugins/helpers"
 )
 
 var sampleConfig = `
@@ -84,31 +84,31 @@ func (s *IllumosMemory) Gather(acc telegraf.Accumulator) error {
 func extraKStats(s *IllumosMemory, token *kstat.Token) map[string]interface{} {
 	fields := make(map[string]interface{})
 
-	if sth.WeWant("kernel", s.ExtraFields) {
+	if helpers.WeWant("kernel", s.ExtraFields) {
 		stat, err := token.GetNamed("unix", 0, "system_pages", "pp_kernel")
 
 		if err == nil {
-			fields["kernel"] = sth.NamedValue(stat).(float64) * pageSize
+			fields["kernel"] = helpers.NamedValue(stat).(float64) * pageSize
 		} else {
 			log.Fatal(err)
 		}
 	}
 
-	if sth.WeWant("freelist", s.ExtraFields) {
+	if helpers.WeWant("freelist", s.ExtraFields) {
 		stat, err := token.GetNamed("unix", 0, "system_pages", "pagesfree")
 
 		if err == nil {
-			fields["freelist"] = sth.NamedValue(stat).(float64) * pageSize
+			fields["freelist"] = helpers.NamedValue(stat).(float64) * pageSize
 		} else {
 			log.Fatal(err)
 		}
 	}
 
-	if sth.WeWant("arcsize", s.ExtraFields) {
+	if helpers.WeWant("arcsize", s.ExtraFields) {
 		stat, err := token.GetNamed("zfs", 0, "arcstats", "size")
 
 		if err == nil {
-			fields["arcsize"] = sth.NamedValue(stat).(float64)
+			fields["arcsize"] = helpers.NamedValue(stat).(float64)
 		} else {
 			log.Fatal(err)
 		}
@@ -127,23 +127,23 @@ func vminfoKStats(s *IllumosMemory, token *kstat.Token) map[string]interface{} {
 		log.Fatal("cannot get vminfo kstats")
 	}
 
-	if sth.WeWant("freemem", s.VminfoFields) {
+	if helpers.WeWant("freemem", s.VminfoFields) {
 		fields["freemem"] = float64(vi.Freemem) * pageSize
 	}
 
-	if sth.WeWant("swap_alloc", s.VminfoFields) {
+	if helpers.WeWant("swap_alloc", s.VminfoFields) {
 		fields["swapAlloc"] = float64(vi.Alloc) * pageSize
 	}
 
-	if sth.WeWant("swap_avail", s.VminfoFields) {
+	if helpers.WeWant("swap_avail", s.VminfoFields) {
 		fields["swapAvail"] = float64(vi.Avail) * pageSize
 	}
 
-	if sth.WeWant("swap_free", s.VminfoFields) {
+	if helpers.WeWant("swap_free", s.VminfoFields) {
 		fields["swapFree"] = float64(vi.Free) * pageSize
 	}
 
-	if sth.WeWant("swap_resv", s.VminfoFields) {
+	if helpers.WeWant("swap_resv", s.VminfoFields) {
 		fields["swapResv"] = float64(vi.Resv) * pageSize
 	}
 
@@ -155,8 +155,8 @@ func parseNamedStats(s *IllumosMemory, stats []*kstat.Named) map[string]interfac
 	fields := make(map[string]interface{})
 
 	for _, stat := range stats {
-		if sth.WeWant(stat.Name, s.CpuvmFields) {
-			fields[stat.Name] = sth.NamedValue(stat).(float64)
+		if helpers.WeWant(stat.Name, s.CpuvmFields) {
+			fields[stat.Name] = helpers.NamedValue(stat).(float64)
 		}
 	}
 
@@ -167,7 +167,7 @@ type cpuvmStatHolder map[int]map[string]interface{}
 
 func perCpuvmKStats(s *IllumosMemory, token *kstat.Token) cpuvmStatHolder {
 	perCPUStats := make(cpuvmStatHolder)
-	modStats := sth.KStatsInModule(token, "cpu")
+	modStats := helpers.KStatsInModule(token, "cpu")
 
 	for _, statGroup := range modStats {
 		if statGroup.Name != "vm" {
@@ -228,7 +228,7 @@ func cpuvmKStats(s *IllumosMemory, token *kstat.Token) map[string]interface{} {
 }
 
 var runSwapCmd = func() string {
-	return sth.RunCmd("/usr/sbin/swap -s")
+	return helpers.RunCmd("/usr/sbin/swap -s")
 }
 
 func parseSwap(s *IllumosMemory) map[string]interface{} {
@@ -237,32 +237,32 @@ func parseSwap(s *IllumosMemory) map[string]interface{} {
 	re := regexp.MustCompile(`total: (\d+k) [\w ]* \+ (\d+k).*= (\d+k) used, (\d+k).*$`)
 	m := re.FindAllStringSubmatch(swapline, -1)[0]
 
-	if sth.WeWant("allocated", s.SwapFields) {
-		bytes, err := sth.Bytify(m[1])
+	if helpers.WeWant("allocated", s.SwapFields) {
+		bytes, err := helpers.Bytify(m[1])
 
 		if err == nil {
 			fields["allocated"] = bytes
 		}
 	}
 
-	if sth.WeWant("reserved", s.SwapFields) {
-		bytes, err := sth.Bytify(m[2])
+	if helpers.WeWant("reserved", s.SwapFields) {
+		bytes, err := helpers.Bytify(m[2])
 
 		if err == nil {
 			fields["reserved"] = bytes
 		}
 	}
 
-	if sth.WeWant("used", s.SwapFields) {
-		bytes, err := sth.Bytify(m[3])
+	if helpers.WeWant("used", s.SwapFields) {
+		bytes, err := helpers.Bytify(m[3])
 
 		if err == nil {
 			fields["used"] = bytes
 		}
 	}
 
-	if sth.WeWant("available", s.SwapFields) {
-		bytes, err := sth.Bytify(m[4])
+	if helpers.WeWant("available", s.SwapFields) {
+		bytes, err := helpers.Bytify(m[4])
 
 		if err == nil {
 			fields["available"] = bytes

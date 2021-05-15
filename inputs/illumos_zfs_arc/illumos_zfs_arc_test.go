@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/influxdata/telegraf/testutil"
-	sth "github.com/snltd/solaris-telegraf-helpers"
+	"github.com/snltd/illumos-telegraf-plugins/helpers"
 	"github.com/stretchr/testify/require"
 )
 
@@ -36,7 +36,7 @@ func TestParseNamedStats(t *testing.T) {
 		Fields: []string{"c", "prefetch_data_hits", "prefetch_data_misses"},
 	}
 
-	testData := sth.FromFixture("zfs:0:arcstats.kstat")
+	testData := helpers.FromFixture("zfs:0:arcstats.kstat")
 	fields := parseNamedStats(s, testData)
 
 	require.Equal(

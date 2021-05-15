@@ -14,7 +14,7 @@ import (
 	"github.com/illumos/go-kstat"
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/inputs"
-	sth "github.com/snltd/solaris-telegraf-helpers"
+	"github.com/snltd/illumos-telegraf-plugins/helpers"
 )
 
 var sampleConfig = `
@@ -66,7 +66,7 @@ func parseCPUinfoKStats(stats []*kstat.Named) (map[string]interface{}, map[strin
 }
 
 func gatherCPUinfoStats(acc telegraf.Accumulator, token *kstat.Token) {
-	stats := sth.KStatsInModule(token, "cpu_info")
+	stats := helpers.KStatsInModule(token, "cpu_info")
 
 	for _, stat := range stats {
 		namedStats, err := stat.AllNamed()
@@ -100,7 +100,7 @@ func parseZoneCPUKStats(stats []*kstat.Named) (map[string]interface{}, map[strin
 // metrics reporting on CPU consumption for each zone. sys and user, each as a gauge, tagged with
 // the zone name.
 func gatherZoneCPUStats(acc telegraf.Accumulator, token *kstat.Token) {
-	zoneStats := sth.KStatsInModule(token, "zones")
+	zoneStats := helpers.KStatsInModule(token, "zones")
 
 	for _, zone := range zoneStats {
 		namedStats, err := zone.AllNamed()
@@ -118,7 +118,7 @@ func parseSysCPUKStats(s *IllumosCPU, stats []*kstat.Named) map[string]interface
 	fields := make(map[string]interface{})
 
 	for _, stat := range stats {
-		if sth.WeWant(stat.Name, s.SysFields) {
+		if helpers.WeWant(stat.Name, s.SysFields) {
 			fields[fieldToMetricPath(stat.Name)] = float64(stat.UintVal)
 		}
 	}
@@ -127,7 +127,7 @@ func parseSysCPUKStats(s *IllumosCPU, stats []*kstat.Named) map[string]interface
 }
 
 func gatherSysCPUStats(s *IllumosCPU, acc telegraf.Accumulator, token *kstat.Token) {
-	cpuStats := sth.KStatsInModule(token, "cpu")
+	cpuStats := helpers.KStatsInModule(token, "cpu")
 
 	for _, cpu := range cpuStats {
 		if cpu.Name == "sys" {

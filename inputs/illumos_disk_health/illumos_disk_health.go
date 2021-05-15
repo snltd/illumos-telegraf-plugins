@@ -8,7 +8,7 @@ import (
 	"github.com/illumos/go-kstat"
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/inputs"
-	sth "github.com/snltd/solaris-telegraf-helpers"
+	"github.com/snltd/illumos-telegraf-plugins/helpers"
 )
 
 var sampleConfig = `
@@ -44,11 +44,11 @@ func parseNamedStats(s *IllumosDiskHealth, stats []*kstat.Named) (map[string]int
 
 	for _, stat := range stats {
 		switch {
-		case sth.WeWant(stat.Name, s.Fields):
-			fields[camelCase(stat.Name)] = sth.NamedValue(stat).(float64)
-		case stat.Name == "Size" && sth.WeWant("Size", s.Tags):
-			tags["size"] = fmt.Sprintf("%d", sth.NamedValue(stat))
-		case sth.WeWant(stat.Name, s.Tags):
+		case helpers.WeWant(stat.Name, s.Fields):
+			fields[camelCase(stat.Name)] = helpers.NamedValue(stat).(float64)
+		case stat.Name == "Size" && helpers.WeWant("Size", s.Tags):
+			tags["size"] = fmt.Sprintf("%d", helpers.NamedValue(stat))
+		case helpers.WeWant(stat.Name, s.Tags):
 			tags[camelCase(stat.Name)] = strings.TrimSpace(stat.StringVal)
 		}
 	}
@@ -62,13 +62,13 @@ func (s *IllumosDiskHealth) Gather(acc telegraf.Accumulator) error {
 		log.Fatal("cannot get kstat token")
 	}
 
-	statList := sth.KStatsInClass(token, "device_error")
+	statList := helpers.KStatsInClass(token, "device_error")
 
 	for _, stat := range statList {
 		chunks := strings.Split(stat.Name, ",")
 		deviceName := chunks[0]
 
-		if sth.WeWant(deviceName, s.Devices) {
+		if helpers.WeWant(deviceName, s.Devices) {
 			namedStats, err := stat.AllNamed()
 
 			if err == nil {

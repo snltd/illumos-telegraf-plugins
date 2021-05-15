@@ -1,13 +1,9 @@
-module github.com/snltd/solaris-telegraf-plugins
+module github.com/snltd/illumos-telegraf-plugins
 
 go 1.15
 
 require (
+	github.com/illumos/go-kstat v0.0.0-20210513183136-173c9b0a9973
 	github.com/influxdata/telegraf v1.18.1
-	github.com/mbenkmann/goformat v0.0.0-20180512004123-256ef38c4271 // indirect
-	github.com/snltd/solaris-telegraf-helpers v0.0.0-20210416214443-a9adf06d4abf
 	github.com/stretchr/testify v1.7.0
-	winterdrache.de/goformat v0.0.0-20180512004123-256ef38c4271 // indirect
 )
-
-replace github.com/snltd/solaris-telegraf-helpers => ../solaris-telegraf-helpers

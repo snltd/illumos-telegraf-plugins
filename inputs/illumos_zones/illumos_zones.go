@@ -3,7 +3,7 @@ package illumos_zones
 import (
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/inputs"
-	sth "github.com/snltd/solaris-telegraf-helpers"
+	"github.com/snltd/illumos-telegraf-plugins/helpers"
 )
 
 func (z *IllumosZones) Description() string {
@@ -12,7 +12,7 @@ func (z *IllumosZones) Description() string {
 
 var (
 	sampleConfig = ""
-	makeZoneMap  = sth.NewZoneMap
+	makeZoneMap  = helpers.NewZoneMap
 )
 
 type IllumosZones struct{}
@@ -32,7 +32,7 @@ func running(state string) int {
 }
 
 // Create an "I am here" metric for each zone. Value is 1 if the zone is running, 0 if it's not.
-func gatherProperties(acc telegraf.Accumulator, zonemap sth.ZoneMap) {
+func gatherProperties(acc telegraf.Accumulator, zonemap helpers.ZoneMap) {
 	for zone, zoneData := range zonemap {
 		acc.AddFields(
 			"zones",

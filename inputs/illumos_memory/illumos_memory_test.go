@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/influxdata/telegraf/testutil"
-	sth "github.com/snltd/solaris-telegraf-helpers"
+	"github.com/snltd/illumos-telegraf-plugins/helpers"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -129,7 +129,7 @@ func TestParseNamedStats(t *testing.T) {
 		CpuvmAggregate: false,
 	}
 
-	testData := sth.FromFixture("cpu:0:vm.kstat")
+	testData := helpers.FromFixture("cpu:0:vm.kstat")
 	fields := parseNamedStats(s, testData)
 
 	assert.Equal(

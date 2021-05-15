@@ -6,7 +6,7 @@ import (
 	"github.com/illumos/go-kstat"
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/inputs"
-	sth "github.com/snltd/solaris-telegraf-helpers"
+	"github.com/snltd/illumos-telegraf-plugins/helpers"
 )
 
 var sampleConfig = `
@@ -34,7 +34,7 @@ func (s *IllumosZfsArc) Gather(acc telegraf.Accumulator) error {
 		log.Fatal("cannot get kstat token")
 	}
 
-	stats := sth.KStatsInModule(token, "zfs")
+	stats := helpers.KStatsInModule(token, "zfs")
 
 	for _, statGroup := range stats {
 		if statGroup.Name == "arcstats" {
@@ -61,8 +61,8 @@ func parseNamedStats(s *IllumosZfsArc, stats []*kstat.Named) map[string]interfac
 	fields := make(map[string]interface{})
 
 	for _, stat := range stats {
-		if sth.WeWant(stat.Name, s.Fields) {
-			fields[stat.Name] = sth.NamedValue(stat).(float64)
+		if helpers.WeWant(stat.Name, s.Fields) {
+			fields[stat.Name] = helpers.NamedValue(stat).(float64)
 		}
 	}
 

@@ -7,7 +7,7 @@ import (
 	"github.com/illumos/go-kstat"
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/inputs"
-	sth "github.com/snltd/solaris-telegraf-helpers"
+	"github.com/snltd/illumos-telegraf-plugins/helpers"
 )
 
 var sampleConfig = `
@@ -34,7 +34,7 @@ type IllumosNetwork struct {
 }
 
 var (
-	makeZoneVnicMap = sth.NewZoneVnicMap
+	makeZoneVnicMap = helpers.NewZoneVnicMap
 	zoneName        = ""
 )
 
@@ -44,7 +44,7 @@ func (s *IllumosNetwork) Gather(acc telegraf.Accumulator) error {
 		log.Fatal("cannot get kstat token")
 	}
 
-	links := sth.KStatsInModule(token, "link")
+	links := helpers.KStatsInModule(token, "link")
 
 	for _, link := range links {
 		// links are of the form link:0:dns_net0 for non-global zones, and link:0:rge0 (net) for the
@@ -66,7 +66,7 @@ func (s *IllumosNetwork) Gather(acc telegraf.Accumulator) error {
 			zone = zoneName
 		}
 
-		if !sth.WeWant(zone, s.Zones) {
+		if !helpers.WeWant(zone, s.Zones) {
 			continue
 		}
 
@@ -82,7 +82,7 @@ func (s *IllumosNetwork) Gather(acc telegraf.Accumulator) error {
 	return nil
 }
 
-func zoneTags(zone, link string, vnic sth.Vnic) map[string]string {
+func zoneTags(zone, link string, vnic helpers.Vnic) map[string]string {
 	if zone == zoneName {
 		return map[string]string{
 			"zone":  zoneName,
@@ -104,18 +104,18 @@ func parseNamedStats(s *IllumosNetwork, stats []*kstat.Named) map[string]interfa
 	fields := make(map[string]interface{})
 
 	for _, stat := range stats {
-		if !sth.WeWant(stat.Name, s.Fields) || !sth.WeWant(stat.KStat.Name, s.Vnics) {
+		if !helpers.WeWant(stat.Name, s.Fields) || !helpers.WeWant(stat.KStat.Name, s.Vnics) {
 			continue
 		}
 
-		fields[stat.Name] = sth.NamedValue(stat).(float64)
+		fields[stat.Name] = helpers.NamedValue(stat).(float64)
 	}
 
 	return fields
 }
 
 func init() {
-	zoneName = sth.ZoneName()
+	zoneName = helpers.ZoneName()
 
 	inputs.Add("illumos_network", func() telegraf.Input { return &IllumosNetwork{} })
 }

@@ -6,7 +6,7 @@ import (
 
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/inputs"
-	sth "github.com/snltd/solaris-telegraf-helpers"
+	"github.com/snltd/illumos-telegraf-plugins/helpers"
 )
 
 var sampleConfig = `
@@ -53,7 +53,7 @@ func (s *IllumosSmf) SampleConfig() string {
 }
 
 var rawOutput = func() string {
-	return sth.RunCmd(externalCmd)
+	return helpers.RunCmd(externalCmd)
 }
 
 func (s *IllumosSmf) Gather(acc telegraf.Accumulator) error {
@@ -108,7 +108,7 @@ func parseSvcs(s IllumosSmf, raw string) svcSummary {
 
 		zone, state, fmri := chunks[0], chunks[1], chunks[2]
 
-		if !sth.WeWant(zone, s.Zones) || !sth.WeWant(state, s.SvcStates) {
+		if !helpers.WeWant(zone, s.Zones) || !helpers.WeWant(state, s.SvcStates) {
 			continue
 		}
 

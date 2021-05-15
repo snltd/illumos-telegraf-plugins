@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/influxdata/telegraf/testutil"
-	sth "github.com/snltd/solaris-telegraf-helpers"
+	"github.com/snltd/illumos-telegraf-plugins/helpers"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -17,7 +17,7 @@ func TestParseNamedStats(t *testing.T) {
 		Zones:  []string{"cube-dns"},
 	}
 
-	testData := sth.FromFixture("link:0:dns_net0.kstat")
+	testData := helpers.FromFixture("link:0:dns_net0.kstat")
 	fields := parseNamedStats(s, testData)
 
 	assert.Equal(
@@ -40,7 +40,7 @@ func TestParseNamedStatsNoSelectedNics(t *testing.T) {
 		Vnics:  []string{"net0"},
 	}
 
-	testData := sth.FromFixture("link:0:dns_net0.kstat")
+	testData := helpers.FromFixture("link:0:dns_net0.kstat")
 	fields := parseNamedStats(s, testData)
 	assert.Equal(t, map[string]interface{}{}, fields)
 }
@@ -58,7 +58,7 @@ func TestZoneTags(t *testing.T) {
 			"speed": "1000mbit",
 			"name":  "dns_net0",
 		},
-		zoneTags("cube-dns", "dns_net0", sth.ParseZoneVnics(sampleDladmOutput)["dns_net0"]),
+		zoneTags("cube-dns", "dns_net0", helpers.ParseZoneVnics(sampleDladmOutput)["dns_net0"]),
 	)
 }
 
@@ -75,7 +75,7 @@ func TestZoneTagsGlobal(t *testing.T) {
 			"speed": "unknown",
 			"name":  "rge0",
 		},
-		zoneTags("global", "rge0", sth.ParseZoneVnics(sampleDladmOutput)["rge0"]),
+		zoneTags("global", "rge0", helpers.ParseZoneVnics(sampleDladmOutput)["rge0"]),
 	)
 }
 

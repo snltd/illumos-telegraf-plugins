@@ -8,7 +8,7 @@ import (
 	"github.com/illumos/go-kstat"
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/inputs"
-	sth "github.com/snltd/solaris-telegraf-helpers"
+	"github.com/snltd/illumos-telegraf-plugins/helpers"
 )
 
 var sampleConfig = `
@@ -38,7 +38,7 @@ func (s *IllumosNfsClient) Gather(acc telegraf.Accumulator) error {
 		log.Fatal("cannot get kstat token")
 	}
 
-	stats := sth.KStatsInModule(token, "nfs")
+	stats := helpers.KStatsInModule(token, "nfs")
 
 	for _, stat := range stats {
 		if !strings.HasPrefix(stat.Name, "rfsreqcnt_v") {
@@ -47,7 +47,7 @@ func (s *IllumosNfsClient) Gather(acc telegraf.Accumulator) error {
 
 		nfsVersion := fmt.Sprintf("v%s", stat.Name[len(stat.Name)-1:])
 
-		if !sth.WeWant(nfsVersion, s.NfsVersions) {
+		if !helpers.WeWant(nfsVersion, s.NfsVersions) {
 			continue
 		}
 
@@ -72,8 +72,8 @@ func parseNamedStats(s *IllumosNfsClient, stats []*kstat.Named) map[string]inter
 	fields := make(map[string]interface{})
 
 	for _, stat := range stats {
-		if sth.WeWant(stat.Name, s.Fields) {
-			fields[stat.Name] = sth.NamedValue(stat).(float64)
+		if helpers.WeWant(stat.Name, s.Fields) {
+			fields[stat.Name] = helpers.NamedValue(stat).(float64)
 		}
 	}
 

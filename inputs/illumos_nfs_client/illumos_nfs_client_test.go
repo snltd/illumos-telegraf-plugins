@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/influxdata/telegraf/testutil"
-	sth "github.com/snltd/solaris-telegraf-helpers"
+	"github.com/snltd/illumos-telegraf-plugins/helpers"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -40,7 +40,7 @@ func TestParseNamedStats(t *testing.T) {
 		NfsVersions: []string{"v4"},
 	}
 
-	testData := sth.FromFixture("nfs:0:rfsreqcnt_v4.kstat")
+	testData := helpers.FromFixture("nfs:0:rfsreqcnt_v4.kstat")
 	fields := parseNamedStats(s, testData)
 
 	assert.Equal(

@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/influxdata/telegraf/testutil"
-	sth "github.com/snltd/solaris-telegraf-helpers"
+	"github.com/snltd/illumos-telegraf-plugins/helpers"
 	"github.com/stretchr/testify/require"
 )
 
@@ -25,7 +25,7 @@ func TestParseNamedStats(t *testing.T) {
 		Tags:    []string{"Vendor", "Serial No", "Product", "Revision"},
 	}
 
-	testData := sth.FromFixture("sderr:6:sd6,err.kstat")
+	testData := helpers.FromFixture("sderr:6:sd6,err.kstat")
 	fields, tags := parseNamedStats(s, testData)
 
 	require.Equal(
