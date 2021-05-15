@@ -2,45 +2,31 @@ package illumos_io
 
 import (
 	"testing"
-	"time"
 
-	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/testutil"
 	"github.com/stretchr/testify/require"
 )
 
-// This test is sketchy. It needs to run on a system with kstats, and worse than that, it needs to
-// run on a system which hasn't served and NFS content. I imagine it's possible to mock the kstat
-// calls, but it's something I don't have the energy for at the moment.
+// This test is sketchy. TODO - feed in some captured kstat data.
 func TestPlugin(t *testing.T) {
+	t.Parallel()
+
 	s := &IllumosIO{
 		Devices: []string{"sd1"},
+		Modules: []string{"sd", "zfs"},
+		Fields:  []string{"reads", "nread", "writes", "nwritten"},
 	}
 
 	acc := testutil.Accumulator{}
 	require.NoError(t, s.Gather(&acc))
 
-	testutil.RequireMetricsEqual(
-		t,
-		testMetrics,
-		acc.GetTelegrafMetrics(),
-		testutil.SortMetrics(),
-		testutil.IgnoreTime(),
-	)
-}
+	metric := acc.GetTelegrafMetrics()[0]
+	require.Equal(t, "io", metric.Name())
 
-var testMetrics = []telegraf.Metric{
-	testutil.MustMetric(
-		"nfs.client",
-		map[string]string{
-			"nfsVersion": "v3",
-		},
-		map[string]interface{}{
-			"create": uint64(0),
-			"write":  uint64(0),
-			"remove": uint64(0),
-			"read":   uint64(0),
-		},
-		time.Now(),
-	),
+	for _, field := range s.Fields {
+		require.True(t, metric.HasField(field))
+	}
+
+	require.True(t, metric.HasTag("serialNo"))
+	require.True(t, metric.HasTag("product"))
 }

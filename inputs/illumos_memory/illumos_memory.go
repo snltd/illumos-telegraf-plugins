@@ -6,9 +6,9 @@ import (
 	"os"
 	"regexp"
 
+	"github.com/illumos/go-kstat"
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/inputs"
-	"github.com/siebenmann/go-kstat"
 	sth "github.com/snltd/solaris-telegraf-helpers"
 )
 
@@ -108,7 +108,7 @@ func extraKStats(s *IllumosMemory, token *kstat.Token) map[string]interface{} {
 		stat, err := token.GetNamed("zfs", 0, "arcstats", "size")
 
 		if err == nil {
-			fields["arcsize"] = sth.NamedValue(stat).(float64) * pageSize
+			fields["arcsize"] = sth.NamedValue(stat).(float64)
 		} else {
 			log.Fatal(err)
 		}

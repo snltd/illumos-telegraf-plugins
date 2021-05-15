@@ -5,9 +5,9 @@ import (
 	"log"
 	"strings"
 
+	"github.com/illumos/go-kstat"
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/inputs"
-	"github.com/siebenmann/go-kstat"
 	sth "github.com/snltd/solaris-telegraf-helpers"
 )
 

@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/illumos/go-kstat"
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/inputs"
-	"github.com/siebenmann/go-kstat"
 	sth "github.com/snltd/solaris-telegraf-helpers"
 )
 
@@ -47,6 +47,10 @@ func extractFields(s *IllumosIO, stat *kstat.IO) map[string]interface{} {
 
 	if sth.WeWant("nwritten", s.Fields) {
 		fields["nwritten"] = float64(stat.Nwritten)
+	}
+
+	if sth.WeWant("reads", s.Fields) {
+		fields["reads"] = float64(stat.Writes)
 	}
 
 	if sth.WeWant("writes", s.Fields) {
@@ -95,21 +99,24 @@ func createTags(token *kstat.Token, mod, device string) map[string]string {
 	}
 
 	deviceRegex := regexp.MustCompile("[0-9]+$")
-	num, err := strconv.Atoi(deviceRegex.FindString(device))
+	instance, err := strconv.Atoi(deviceRegex.FindString(device))
 
 	if err != nil {
 		return tags
 	}
 
-	product := sth.KstatString(token, fmt.Sprintf("sderr:%d:%s,err:Product", num, device))
-	ser_no := sth.KstatString(token, fmt.Sprintf("sderr:%d:%s,err:Serial No", num, device))
+	name := fmt.Sprintf("%s,err", device)
 
-	if ser_no != "" {
-		tags["ser_no"] = ser_no
+	serialNo, err := token.GetNamed("sderr", instance, name, "Serial No")
+
+	if err == nil {
+		tags["serialNo"] = sth.NamedValue(serialNo).(string)
 	}
 
-	if product != "" {
-		tags["product"] = product
+	product, err := token.GetNamed("sderr", instance, name, "Product")
+
+	if err == nil {
+		tags["product"] = sth.NamedValue(product).(string)
 	}
 
 	return tags
@@ -117,14 +124,13 @@ func createTags(token *kstat.Token, mod, device string) map[string]string {
 
 func (s *IllumosIO) Gather(acc telegraf.Accumulator) error {
 	token, err := kstat.Open()
-
 	if err != nil {
 		log.Fatal("cannot get kstat token")
 	}
 
-	rawKstats := sth.KstatIoClass(token, "disk")
+	ioStats := sth.KStatIoClass(token, "disk")
 
-	for modName, stat := range rawKstats {
+	for modName, stat := range ioStats {
 		chunks := strings.Split(modName, ":")
 		mod := chunks[0]
 		name := chunks[1]
