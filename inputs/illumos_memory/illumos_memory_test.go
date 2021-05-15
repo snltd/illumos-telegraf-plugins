@@ -6,7 +6,6 @@ import (
 
 	"github.com/influxdata/telegraf/testutil"
 	"github.com/snltd/illumos-telegraf-plugins/helpers"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -19,7 +18,7 @@ func TestParseSwap(t *testing.T) {
 		return "total: 2852796k bytes allocated + 1950828k reserved = 4803624k used, 2638448k available"
 	}
 
-	assert.Equal(
+	require.Equal(
 		t,
 		map[string]interface{}{
 			"allocated": float64(2921263104),
@@ -51,45 +50,45 @@ func TestPlugin(t *testing.T) {
 
 	// 'swap -s' metrics
 	swapMetric := acc.GetTelegrafMetrics()[0]
-	assert.Equal(t, "memory.swap", swapMetric.Name())
+	require.Equal(t, "memory.swap", swapMetric.Name())
 
 	for _, field := range s.SwapFields {
 		_, present := swapMetric.GetField(field)
-		assert.True(t, present)
+		require.True(t, present)
 	}
 
 	// "extra" metrics
 	extraMetric := acc.GetTelegrafMetrics()[1]
-	assert.Equal(t, "memory", extraMetric.Name())
+	require.Equal(t, "memory", extraMetric.Name())
 
 	for _, field := range s.ExtraFields {
 		_, present := extraMetric.GetField(field)
-		assert.True(t, present)
+		require.True(t, present)
 	}
 
 	// vminfo metrics
 	vminfoMetric := acc.GetTelegrafMetrics()[2]
-	assert.Equal(t, "memory.vminfo", vminfoMetric.Name())
+	require.Equal(t, "memory.vminfo", vminfoMetric.Name())
 
 	vminfoMetricFields := []string{"swapAlloc", "swapAvail", "swapFree", "swapResv"}
 
 	for _, field := range vminfoMetricFields {
 		_, present := vminfoMetric.GetField(field)
-		assert.True(t, present)
+		require.True(t, present)
 	}
 
 	// cpu_vm metrics. I think we'll always have CPU0
 	cpuvmMetric := acc.GetTelegrafMetrics()[3]
-	assert.Equal(t, "memory.cpuVm", cpuvmMetric.Name())
+	require.Equal(t, "memory.cpuVm", cpuvmMetric.Name())
 
 	for _, field := range s.CpuvmFields {
 		fieldName := fmt.Sprintf("vm.cpu0.%s", field)
 		_, present := cpuvmMetric.GetField(fieldName)
-		assert.True(t, present)
+		require.True(t, present)
 	}
 
 	_, present := cpuvmMetric.GetField("vm.aggregate.pgin")
-	assert.False(t, present)
+	require.False(t, present)
 }
 
 func TestPluginAggregates(t *testing.T) {
@@ -105,18 +104,18 @@ func TestPluginAggregates(t *testing.T) {
 	require.NoError(t, s.Gather(&acc))
 
 	cpuvmMetric := acc.GetTelegrafMetrics()[0]
-	assert.Equal(t, "memory.cpuVm", cpuvmMetric.Name())
+	require.Equal(t, "memory.cpuVm", cpuvmMetric.Name())
 
 	for _, field := range s.CpuvmFields {
 		fieldName := fmt.Sprintf("vm.cpu0.%s", field)
 		_, present := cpuvmMetric.GetField(fieldName)
-		assert.False(t, present)
+		require.False(t, present)
 	}
 
 	for _, field := range s.CpuvmFields {
 		fieldName := fmt.Sprintf("vm.aggregate.%s", field)
 		_, present := cpuvmMetric.GetField(fieldName)
-		assert.True(t, present)
+		require.True(t, present)
 	}
 }
 
@@ -132,7 +131,7 @@ func TestParseNamedStats(t *testing.T) {
 	testData := helpers.FromFixture("cpu:0:vm.kstat")
 	fields := parseNamedStats(s, testData)
 
-	assert.Equal(
+	require.Equal(
 		t,
 		fields,
 		map[string]interface{}{
@@ -147,7 +146,7 @@ func TestParseNamedStats(t *testing.T) {
 func TestAggregateCpuVmKStats(t *testing.T) {
 	t.Parallel()
 
-	assert.Equal(
+	require.Equal(
 		t,
 		map[string]interface{}{
 			"vm.aggregate.anonpgin":  float64(864),
@@ -162,7 +161,7 @@ func TestAggregateCpuVmKStats(t *testing.T) {
 func TestIndividualCpuvmKStats(t *testing.T) {
 	t.Parallel()
 
-	assert.Equal(
+	require.Equal(
 		t,
 		map[string]interface{}{
 			"vm.cpu0.anonpgin":  float64(397),

@@ -7,14 +7,13 @@ import (
 
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/testutil"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestParseFmstatLine(t *testing.T) {
 	t.Parallel()
 
-	assert.Equal(
+	require.Equal(
 		t,
 		Fmstat{
 			module: "fmd-self-diagnosis",
@@ -41,7 +40,7 @@ func TestParseFmstatLine(t *testing.T) {
 func TestParseFmstatHeader(t *testing.T) {
 	t.Parallel()
 
-	assert.Equal(
+	require.Equal(
 		t,
 		[]string{
 			"module",
@@ -69,7 +68,7 @@ func TestFmadmImpacts(t *testing.T) {
 		return string(ret)
 	}
 
-	assert.ElementsMatch(
+	require.ElementsMatch(
 		t,
 		[]string{
 			"fault.fs.zfs.vdev.checksum",

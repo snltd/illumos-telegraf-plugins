@@ -33,7 +33,7 @@ var testMetrics = []telegraf.Metric{
 func TestContractMap(t *testing.T) {
 	contractMap := contractMap(sampleSvcsOutput)
 
-	assert.Equal(
+	require.Equal(
 		t,
 		map[int]string{
 			67:  "svc:/network/inetd:default",
@@ -45,7 +45,7 @@ func TestContractMap(t *testing.T) {
 		contractMap,
 	)
 
-	assert.Equal(t, "svc:/network/ssh:default", contractMap[72])
+	require.Equal(t, "svc:/network/ssh:default", contractMap[72])
 }
 
 // This test uses the current running process to test a few easily accessible members of the
@@ -53,11 +53,11 @@ func TestContractMap(t *testing.T) {
 // in this repo, so hey-ho.
 func TestProcPsinfo(t *testing.T) {
 	psinfo, err := procPsinfo(os.Getpid())
-	assert.Nil(t, err)
-	assert.Equal(t, psinfo.Pr_pid, pid_t(os.Getpid()))
-	assert.Equal(t, psinfo.Pr_ppid, pid_t(os.Getppid()))
-	assert.Equal(t, psinfo.Pr_uid, uid_t(os.Getuid()))
-	assert.Equal(t, psinfo.Pr_gid, gid_t(os.Getgid()))
+	require.Nil(t, err)
+	require.Equal(t, psinfo.Pr_pid, pid_t(os.Getpid()))
+	require.Equal(t, psinfo.Pr_ppid, pid_t(os.Getppid()))
+	require.Equal(t, psinfo.Pr_uid, uid_t(os.Getuid()))
+	require.Equal(t, psinfo.Pr_gid, gid_t(os.Getgid()))
 }
 */
 
@@ -136,7 +136,7 @@ func TestProcPidList(t *testing.T) {
 
 /*
 func TestZoneLookup(t *testing.T) {
-	assert.Equal(
+	require.Equal(
 		t,
 		"cube-media",
 		zoneLookup(42),

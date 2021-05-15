@@ -5,7 +5,6 @@ import (
 
 	"github.com/influxdata/telegraf/testutil"
 	"github.com/snltd/illumos-telegraf-plugins/helpers"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -20,7 +19,7 @@ func TestParseNamedStats(t *testing.T) {
 	testData := helpers.FromFixture("link:0:dns_net0.kstat")
 	fields := parseNamedStats(s, testData)
 
-	assert.Equal(
+	require.Equal(
 		t,
 		map[string]interface{}{
 			"obytes64":   float64(69053870),
@@ -42,7 +41,7 @@ func TestParseNamedStatsNoSelectedNics(t *testing.T) {
 
 	testData := helpers.FromFixture("link:0:dns_net0.kstat")
 	fields := parseNamedStats(s, testData)
-	assert.Equal(t, map[string]interface{}{}, fields)
+	require.Equal(t, map[string]interface{}{}, fields)
 }
 
 func TestZoneTags(t *testing.T) {
@@ -50,7 +49,7 @@ func TestZoneTags(t *testing.T) {
 
 	zoneName = "global"
 
-	assert.Equal(
+	require.Equal(
 		t,
 		map[string]string{
 			"zone":  "cube-dns",
@@ -67,7 +66,7 @@ func TestZoneTagsGlobal(t *testing.T) {
 
 	zoneName = "global"
 
-	assert.Equal(
+	require.Equal(
 		t,
 		map[string]string{
 			"zone":  "global",
@@ -90,15 +89,15 @@ func TestPlugin(t *testing.T) {
 	require.NoError(t, s.Gather(&acc))
 
 	metric := acc.GetTelegrafMetrics()[0]
-	assert.Equal(t, "net", metric.Name())
-	assert.True(t, metric.HasTag("zone"))
-	assert.True(t, metric.HasTag("link"))
-	assert.True(t, metric.HasTag("speed"))
-	assert.True(t, metric.HasTag("name"))
+	require.Equal(t, "net", metric.Name())
+	require.True(t, metric.HasTag("zone"))
+	require.True(t, metric.HasTag("link"))
+	require.True(t, metric.HasTag("speed"))
+	require.True(t, metric.HasTag("name"))
 
 	for _, field := range s.Fields {
 		_, present := metric.GetField(field)
-		assert.True(t, present)
+		require.True(t, present)
 	}
 }
 

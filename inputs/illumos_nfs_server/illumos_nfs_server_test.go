@@ -5,7 +5,6 @@ import (
 
 	"github.com/influxdata/telegraf/testutil"
 	"github.com/snltd/illumos-telegraf-plugins/helpers"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -23,12 +22,12 @@ func TestPlugin(t *testing.T) {
 	require.NoError(t, s.Gather(&acc))
 	metric := acc.GetTelegrafMetrics()[0]
 
-	assert.Equal(t, "nfs.server", metric.Name())
-	assert.True(t, metric.HasTag("nfsVersion"))
+	require.Equal(t, "nfs.server", metric.Name())
+	require.True(t, metric.HasTag("nfsVersion"))
 
 	for _, field := range s.Fields {
 		_, present := metric.GetField(field)
-		assert.True(t, present)
+		require.True(t, present)
 	}
 }
 
@@ -43,7 +42,7 @@ func TestParseNamedStats(t *testing.T) {
 	testData := helpers.FromFixture("nfs:0:rfsproccnt_v4.kstat")
 	fields := parseNamedStats(s, testData)
 
-	assert.Equal(
+	require.Equal(
 		t,
 		fields,
 		map[string]interface{}{

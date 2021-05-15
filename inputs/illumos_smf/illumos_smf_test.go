@@ -6,7 +6,6 @@ import (
 
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/testutil"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -87,7 +86,7 @@ func TestParseSvcsNoFilters(t *testing.T) {
 
 	testConfig := IllumosSmf{}
 
-	assert.Equal(
+	require.Equal(
 		t,
 		svcSummary{
 			counts: svcCounts{
@@ -121,7 +120,7 @@ func TestParseSvcsFilters(t *testing.T) {
 		GenerateDetails: true,
 	}
 
-	assert.Equal(
+	require.Equal(
 		t,
 		svcSummary{
 			counts: svcCounts{
