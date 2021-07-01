@@ -70,6 +70,8 @@ A very experimental plugin which parses the output of `fmadm(1m)` and
 `fmstat(1m)` to produce information on system failures.
 
 ### illumos_io
+Gets data about IO throughput.
+
 ### illumos_memory
 Aggregates virtual memory information from a number of kstats and, if you want
 it, the output of `swap(1m)`. Swapping/paging info defaults to per-cpu, but
@@ -87,6 +89,9 @@ to run Telegraf in the zones.
 ### illumos_nfs_server
 NFS server KStats. Not much more to say.
 
+## illumos_patches
+Tells you how many of your installed packages are ready for upgrade.
+
 ### illumos_smf
 Parses the output of `svcs(1m)` to count the number of SMF services in
 particular states. Also reports errant services with sufficient tagging to
@@ -96,13 +101,10 @@ easily track them down and fix them.
 Reports ZFS ARC statistics.
 
 ### illumos_zones
-Turns `zoneadm list` into numbers.
+Turns `zoneadm list` into numbers, and tells you how old your zones are.
 
 ### illumos_zpool
 High-level ZFS pool statistics from the output of `zpool list`.
-
-### smartos_zone
-### solaris_proc
 
 ## Contributing
 
