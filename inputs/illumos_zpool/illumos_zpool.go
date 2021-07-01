@@ -1,6 +1,7 @@
 package illumos_zpool
 
 import (
+	"log"
 	"strconv"
 	"strings"
 
@@ -28,7 +29,13 @@ func (s *IllumosZpool) SampleConfig() string {
 }
 
 var zpoolOutput = func() string {
-	return helpers.RunCmd("/usr/sbin/zpool list")
+	stdout, _, err := helpers.RunCmd("/usr/sbin/zpool list")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return stdout
 }
 
 func (s *IllumosZpool) Gather(acc telegraf.Accumulator) error {

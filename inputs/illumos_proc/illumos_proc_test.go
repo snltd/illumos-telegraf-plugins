@@ -25,14 +25,14 @@ func TestPlugin(t *testing.T) {
 	for _, metric := range acc.GetTelegrafMetrics() {
 		fmt.Println(metric.Name())
 		switch metric.Name() {
-		case "proc.top.size":
+		case "proc.top":
 			testProcTopMetric(s, t, metric)
-		case "proc.top.rss":
-			testProcTopMetric(s, t, metric)
-		case "proc.detail.vim":
+		//case "proc.top.rss":
+		//testProcTopMetric(s, t, metric)
+		case "proc.detail":
 			testProcDetailMetric(s, t, metric)
-		case "proc.detail.cron":
-			testProcDetailMetric(s, t, metric)
+		//case "proc.detail.cron":
+		////testProcDetailMetric(s, t, metric)
 		default:
 			t.Logf("no match for %s", metric.Name())
 			require.Equal(t, 0, 1) // because this should never happen

@@ -1,7 +1,7 @@
 package helpers
 
 func WeWant(want string, have []string) bool {
-	if len(have) == 0 {
+	if want == "snaptime" || want == "crtime" || len(have) == 0 {
 		return true
 	}
 

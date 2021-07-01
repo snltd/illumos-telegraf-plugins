@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 )
@@ -32,15 +33,23 @@ type ZoneVnicMap map[string]Vnic
 
 // NewZoneMap creates a ZoneMap describing the current state of the system.
 func NewZoneMap() ZoneMap {
-	raw := RunCmd("/usr/sbin/zoneadm list -cp")
+	stdout, _, err := RunCmd("/usr/sbin/zoneadm list -cp")
 
-	return ParseZones(raw)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return ParseZones(stdout)
 }
 
 func NewZoneVnicMap() ZoneVnicMap {
-	raw := RunCmd("/usr/sbin/dladm show-vnic -po link,zone,over,speed")
+	stdout, _, err := RunCmd("/usr/sbin/dladm show-vnic -po link,zone,over,speed")
 
-	return ParseZoneVnics(raw)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return ParseZoneVnics(stdout)
 }
 
 // Names returns a list of zones in the map.
@@ -80,7 +89,13 @@ func (z ZoneMap) InState(state string) []string {
 
 // ZoneName returns the name of the current zone.
 func ZoneName() string {
-	return RunCmd("/bin/zonename")
+	stdout, _, err := RunCmd("/bin/zonename")
+
+	if err != nil {
+		log.Fatal("could not get zonename")
+	}
+
+	return stdout
 }
 
 // ParseZones turns a chunk of raw `zoneadm list -p` output into a ZoneMap. It is public so

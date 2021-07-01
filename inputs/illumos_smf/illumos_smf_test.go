@@ -18,7 +18,7 @@ func TestPlugin(t *testing.T) {
 		GenerateDetails: true,
 	}
 
-	rawOutput = func() string {
+	rawSvcsOutput = func() string {
 		return sampleOutput
 	}
 

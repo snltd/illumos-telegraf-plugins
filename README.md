@@ -4,8 +4,9 @@ This is a collection of Telegraf input plugins which I wrote because I needed
 them.
 
 They work fine on my OmniOS boxes, collecting the information which I wanted
-to see, and presenting it in a way I think is useful. This leads to a number
-of caveats.
+to see, and presenting it in a way I think is useful.
+
+Things to note.
 
 * Most of the plugins use KStats, and the KStat values are sent "as is". That
   is, I do not calculate rates inside Telegraf. Things like CPU usage, which
@@ -17,8 +18,8 @@ of caveats.
   different KStats to mine, so you may be missing tags in places. I'm thinking
   specifically of disks, but who knows what else.
 * Some of the plugins (e.g. memory) will work on an x86 Solaris system, but
-  some (e.g. SMF) won't. Suck it and see. Happy to accept PRs if anyone
-  modifies the code to work right across SunOS.
+  some (e.g. SMF) won't. Suck it and see. I'd be delighted to receive  PRs if
+  anyone modifies the code to work right across SunOS.
 * I have no interest in getting any of these plugins merged with the official
   Telegraf distribution. Illumos is a serious minority interest these days,
   and I can't imagine the Telegraf people have any desire to be encumbered
@@ -34,8 +35,24 @@ of caveats.
 
 All of that said, I've found the plugins reliable and useful.
 
-## The Plugins
+## Building
 
+Get the Telegraf source, and in `plugins/input/all/all.go` add a
+bunch of lines like:
+
+```go
+_ "github.com/snltd/illumos-telegraf-plugins/illumos_io"
+_ "github.com/snltd/illumos-telegraf-plugins/illumos_memory"
+_ "github.com/snltd/illumos-telegraf-plugins/illumos_network"
+_ "github.com/snltd/illumos-telegraf-plugins/illumos_nfs_client"
+_ "github.com/snltd/illumos-telegraf-plugins/illumos_nfs_server"
+_ "github.com/snltd/illumos-telegraf-plugins/illumos_smf"
+_ "github.com/snltd/illumos-telegraf-plugins/illumos_zpool"
+```
+
+Then build Telegraf with `gmake`.
+
+## The Plugins
 
 ### illumos_cpu
 CPU usage, presented in nanoseconds, as per the kstats. It's up to you and
@@ -86,23 +103,6 @@ High-level ZFS pool statistics from the output of `zpool list`.
 
 ### smartos_zone
 ### solaris_proc
-
-## Building
-
-Get the Telegraf source, and in `plugins/input/all/all.go` add a
-bunch of lines like:
-
-```go
-_ "github.com/snltd/illumos-telegraf-plugins/illumos_io"
-_ "github.com/snltd/illumos-telegraf-plugins/illumos_memory"
-_ "github.com/snltd/illumos-telegraf-plugins/illumos_network"
-_ "github.com/snltd/illumos-telegraf-plugins/illumos_nfs_client"
-_ "github.com/snltd/illumos-telegraf-plugins/illumos_nfs_server"
-_ "github.com/snltd/illumos-telegraf-plugins/illumos_smf"
-_ "github.com/snltd/illumos-telegraf-plugins/illumos_zpool"
-```
-
-Then build Telegraf with `gmake`.
 
 ## Contributing
 

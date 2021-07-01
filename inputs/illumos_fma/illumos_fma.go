@@ -1,6 +1,7 @@
 package illumos_fma
 
 import (
+	"log"
 	"strconv"
 	"strings"
 
@@ -42,11 +43,23 @@ func (s *IllumosFma) SampleConfig() string {
 }
 
 var runFmstatCmd = func() string {
-	return helpers.RunCmdPfexec("/usr/sbin/fmstat")
+	stdout, _, err := helpers.RunCmdPfexec("/usr/sbin/fmstat")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return stdout
 }
 
 var runFmadmFaultyCmd = func() string {
-	return helpers.RunCmdPfexec("/usr/sbin/fmadm faulty")
+	stdout, _, err := helpers.RunCmdPfexec("/usr/sbin/fmadm faulty")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return stdout
 }
 
 func gatherFmstat(s *IllumosFma, acc telegraf.Accumulator) {

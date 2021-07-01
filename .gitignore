@@ -5,5 +5,5 @@
 *.dylib
 *.test
 *.out
- vendor/
- *.swp
+vendor/
+*.swp

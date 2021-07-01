@@ -42,7 +42,7 @@ type svcErr struct {
 	fmri  string
 }
 
-const externalCmd = "/bin/svcs -aHZ -ozone,state,fmri"
+const svcsCmd = "/bin/svcs -aHZ -ozone,state,fmri"
 
 func (s *IllumosSmf) Description() string {
 	return "Aggregates the states of SMF services across a host."
@@ -52,12 +52,18 @@ func (s *IllumosSmf) SampleConfig() string {
 	return sampleConfig
 }
 
-var rawOutput = func() string {
-	return helpers.RunCmd(externalCmd)
+var rawSvcsOutput = func() string {
+	stdout, _, err := helpers.RunCmd(svcsCmd)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return stdout
 }
 
 func (s *IllumosSmf) Gather(acc telegraf.Accumulator) error {
-	data := parseSvcs(*s, rawOutput())
+	data := parseSvcs(*s, rawSvcsOutput())
 
 	for zone, stateCounts := range data.counts {
 		for state, count := range stateCounts {

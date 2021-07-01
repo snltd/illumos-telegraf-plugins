@@ -28,7 +28,7 @@ var sampleConfig = `
 	## under 'proc.detail.<execname>'.
 	# detail_fields = ["size", "rss"]
 	## Which tags to apply, to all metrics. Some, like the SMF service, are a little expensive.
-	# tags = ["name", "pid", "zone", "svc"]
+	# tags = ["execname", "pid", "zone", "svc"]
 `
 
 func (s *IllumosProc) Description() string {
@@ -40,6 +40,7 @@ func (s *IllumosProc) SampleConfig() string {
 }
 
 type IllumosProc struct {
+	lastStats     []processDetail
 	TopFields     []string
 	TopFieldLimit int
 	DetailedProcs []string
@@ -50,6 +51,7 @@ type IllumosProc struct {
 //type procItems map[string]interface{}
 
 var procDir = "/proc" // a var so it can be overridden to use fixtures in testing
+var lastStats []processDetail
 
 type processDetail struct {
 	Fields map[string]interface{} // ready to pass to Telegraf's accumulator
@@ -93,26 +95,45 @@ func findDetailedProcs(desiredProcs []string, procList []processDetail) []proces
 	return ret
 }
 
+func procListDeltas(then, now []processDetail) []processDetail {
+	var ret []processDetail
+
+	// If there's no previous data, return nothing. The caller will check for this.
+
+	if len(then) == 0 {
+		return ret
+	}
+
+	return ret
+}
+
 func (s *IllumosProc) Gather(acc telegraf.Accumulator) error {
 	procList := processDetails(procPidList())
 
-	if s.TopFieldLimit > 0 {
-		for _, field := range s.TopFields {
-			topProcList := findTopProcs(s.TopFieldLimit, field, procList, s.Tags)
-			fields, tags := selectMetrics(topProcList, s.TopFields, s.Tags)
-
-			acc.AddFields(fmt.Sprintf("proc.top.%s", field), fields, tags)
-		}
-	}
+	// The detailed process info is sent as raw kstat values, just like all the other plugins
 
 	if len(s.DetailedProcs) > 0 {
-		for _, execname := range s.DetailedProcs {
-			detailProcList := findDetailedProcs(s.DetailedProcs, procList)
-			fields, tags := selectMetrics(detailProcList, s.DetailFields, s.Tags)
+		detailProcList := findDetailedProcs(s.DetailedProcs, procList)
+		fields, tags := selectMetrics(detailProcList, s.DetailFields, s.Tags)
+		acc.AddFields(fmt.Sprintf("proc.detail"), fields, tags)
+	}
 
-			acc.AddFields(fmt.Sprintf("proc.detail.%s", execname), fields, tags)
+	// To work out the top consumers, we need to calculate rates.
+
+	if s.TopFieldLimit > 0 {
+		procListDeltas := procListDeltas(s.lastStats, procList)
+
+		if len(procListDeltas) > 0 {
+			for _, field := range s.TopFields {
+				topProcList := findTopProcs(s.TopFieldLimit, field, procListDeltas, s.Tags)
+				fields, tags := selectMetrics(topProcList, s.TopFields, s.Tags)
+
+				acc.AddFields(fmt.Sprintf("proc.top"), fields, tags)
+			}
 		}
 	}
+
+	s.lastStats = procList
 
 	return nil
 }
