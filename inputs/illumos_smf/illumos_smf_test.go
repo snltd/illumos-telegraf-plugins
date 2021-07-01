@@ -1,22 +1,24 @@
 package illumos_smf
 
 import (
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/testutil"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
+
+	"github.com/influxdata/telegraf"
+	"github.com/influxdata/telegraf/testutil"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPlugin(t *testing.T) {
+	t.Parallel()
+
 	s := &IllumosSmf{
 		SvcStates:       []string{"online", "maintenance"},
 		Zones:           []string{"global", "cube-pkgsrc"},
 		GenerateDetails: true,
 	}
 
-	rawOutput = func() string {
+	rawSvcsOutput = func() string {
 		return sampleOutput
 	}
 
@@ -80,9 +82,11 @@ var testMetricsFull = []telegraf.Metric{
 }
 
 func TestParseSvcsNoFilters(t *testing.T) {
+	t.Parallel()
+
 	testConfig := IllumosSmf{}
 
-	assert.Equal(
+	require.Equal(
 		t,
 		svcSummary{
 			counts: svcCounts{
@@ -108,13 +112,15 @@ func TestParseSvcsNoFilters(t *testing.T) {
 }
 
 func TestParseSvcsFilters(t *testing.T) {
+	t.Parallel()
+
 	testConfig := IllumosSmf{
 		SvcStates:       []string{"online", "maintenance"},
 		Zones:           []string{"global", "cube-pkgsrc"},
 		GenerateDetails: true,
 	}
 
-	assert.Equal(
+	require.Equal(
 		t,
 		svcSummary{
 			counts: svcCounts{

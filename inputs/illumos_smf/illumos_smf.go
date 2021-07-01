@@ -1,10 +1,12 @@
 package illumos_smf
 
 import (
+	"log"
+	"strings"
+
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/inputs"
-	sth "github.com/snltd/solaris-telegraf-helpers"
-	"strings"
+	"github.com/snltd/illumos-telegraf-plugins/helpers"
 )
 
 var sampleConfig = `
@@ -40,7 +42,7 @@ type svcErr struct {
 	fmri  string
 }
 
-const externalCmd = "/bin/svcs -aHZ -ozone,state,fmri"
+const svcsCmd = "/bin/svcs -aHZ -ozone,state,fmri"
 
 func (s *IllumosSmf) Description() string {
 	return "Aggregates the states of SMF services across a host."
@@ -50,12 +52,18 @@ func (s *IllumosSmf) SampleConfig() string {
 	return sampleConfig
 }
 
-var rawOutput = func() string {
-	return sth.RunCmd(externalCmd)
+var rawSvcsOutput = func() string {
+	stdout, _, err := helpers.RunCmd(svcsCmd)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return stdout
 }
 
 func (s *IllumosSmf) Gather(acc telegraf.Accumulator) error {
-	data := parseSvcs(*s, rawOutput())
+	data := parseSvcs(*s, rawSvcsOutput())
 
 	for zone, stateCounts := range data.counts {
 		for state, count := range stateCounts {
@@ -97,9 +105,16 @@ func parseSvcs(s IllumosSmf, raw string) svcSummary {
 
 	for _, svcLine := range strings.Split(raw, "\n") {
 		chunks := strings.Fields(svcLine)
+
+		if len(chunks) != 3 { //nolint
+			log.Printf("could not parse svc '%s'", svcLine)
+
+			continue
+		}
+
 		zone, state, fmri := chunks[0], chunks[1], chunks[2]
 
-		if !sth.WeWant(zone, s.Zones) || !sth.WeWant(state, s.SvcStates) {
+		if !helpers.WeWant(zone, s.Zones) || !helpers.WeWant(state, s.SvcStates) {
 			continue
 		}
 
@@ -115,7 +130,7 @@ func parseSvcs(s IllumosSmf, raw string) svcSummary {
 			ret.counts[zone][state] = 0
 		}
 
-		ret.counts[zone][state] += 1
+		ret.counts[zone][state]++
 
 		if s.GenerateDetails && state != "online" {
 			ret.svcErrs = append(ret.svcErrs, svcErr{zone, state, fmri})

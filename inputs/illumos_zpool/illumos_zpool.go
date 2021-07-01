@@ -1,11 +1,13 @@
 package illumos_zpool
 
 import (
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
-	sh "github.com/snltd/solaris-telegraf-helpers"
+	"log"
 	"strconv"
 	"strings"
+
+	"github.com/influxdata/telegraf"
+	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/snltd/illumos-telegraf-plugins/helpers"
 )
 
 var sampleConfig = `
@@ -27,7 +29,13 @@ func (s *IllumosZpool) SampleConfig() string {
 }
 
 var zpoolOutput = func() string {
-	return sh.RunCmd("/usr/sbin/zpool list")
+	stdout, _, err := helpers.RunCmd("/usr/sbin/zpool list")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return stdout
 }
 
 func (s *IllumosZpool) Gather(acc telegraf.Accumulator) error {
@@ -40,7 +48,7 @@ func (s *IllumosZpool) Gather(acc telegraf.Accumulator) error {
 		tags := map[string]string{"name": poolStats.name}
 
 		for stat, val := range poolStats.props {
-			if sh.WeWant(stat, s.Fields) {
+			if helpers.WeWant(stat, s.Fields) {
 				fields[stat] = val
 			}
 		}
@@ -51,7 +59,7 @@ func (s *IllumosZpool) Gather(acc telegraf.Accumulator) error {
 	return nil
 }
 
-// parseHeader turns the first line of `zpool list`'s output into an array of lower-case strings
+// parseHeader turns the first line of `zpool list`'s output into an array of lower-case strings.
 func parseHeader(raw string) []string {
 	return strings.Fields(strings.ToLower(raw))
 }
@@ -72,7 +80,7 @@ func healthtoi(health string) int {
 		}
 	}
 
-	return 99
+	return 99 //nolint
 }
 
 // Zpool stores all the Zpool properties in the `props` map, which is dynamically generated. This
@@ -102,7 +110,7 @@ func parseZpool(raw, rawHeader string) Zpool {
 		case "alloc":
 			fallthrough
 		case "free":
-			pool.props[property], _ = sh.Bytify(field)
+			pool.props[property], _ = helpers.Bytify(field)
 		case "frag":
 			fallthrough
 		case "cap":
