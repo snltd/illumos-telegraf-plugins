@@ -1,10 +1,12 @@
 # Illumos Telegraf Plugins
 
-This is a collection of Telegraf input plugins which I wrote because I needed
-them.
+This is a collection of Illumos-specific
+[Telegraf](https://github.com/influxdata/telegraf) input plugins which I wrote
+because I needed them.
 
 They work fine on my OmniOS boxes, collecting the information which I wanted
-to see, and presenting it in a way I think is useful.
+to see, and presenting it in a way I think is useful. I'm not sure exactly how
+well they will work on SmartOS, but my guess would be "fine".
 
 Things to note.
 
@@ -37,20 +39,50 @@ All of that said, I've found the plugins reliable and useful.
 
 ## Building
 
-Get the Telegraf source, and in `plugins/input/all/all.go` add a
-bunch of lines like:
+I build on OmniOS, in a `lipkg` zone with the following packages.
 
-```go
-_ "github.com/snltd/illumos-telegraf-plugins/illumos_io"
-_ "github.com/snltd/illumos-telegraf-plugins/illumos_memory"
-_ "github.com/snltd/illumos-telegraf-plugins/illumos_network"
-_ "github.com/snltd/illumos-telegraf-plugins/illumos_nfs_client"
-_ "github.com/snltd/illumos-telegraf-plugins/illumos_nfs_server"
-_ "github.com/snltd/illumos-telegraf-plugins/illumos_smf"
-_ "github.com/snltd/illumos-telegraf-plugins/illumos_zpool"
+```
+developer/build/gnu-make
+developer/versioning/git
+ooce/developer/go-116
 ```
 
-Then build Telegraf with `gmake`.
+Get the Telegraf source and pick a release. I use 1.16.3. 1.17 requires
+substantially more hacking around to build, and 1.18 allocates a huge amount
+of swap.
+
+```
+git clone https://github.com/influxdata/telegraf.git
+cd telegraf
+git checkout v1.16.3
+vi plugins/inputs/all/all.go
+```
+
+and add these lines to the `inputs()`. Feel free to omit any you don't need:
+the fewer plugins you try to build, the lower your chance of failure!
+
+```go
+_ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_cpu"
+_ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_disk_health"
+_ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_fma"
+_ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_io"
+_ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_memory"
+_ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_network"
+_ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_nfs_client"
+_ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_nfs_server"
+_ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_patches"
+_ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_proc"
+_ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_smf"
+_ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_zfs_arc"
+_ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_zones"
+_ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_zpool"
+```
+
+I remove the default equivalents too, since they're useless to us.
+
+```
+gmake
+```
 
 ## The Plugins
 
