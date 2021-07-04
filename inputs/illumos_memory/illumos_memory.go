@@ -60,9 +60,12 @@ func (s *IllumosMemory) Gather(acc telegraf.Accumulator) error {
 	}
 
 	token, err := kstat.Open()
+
 	if err != nil {
 		return err
 	}
+
+	defer token.Close()
 
 	if s.ExtraOn {
 		acc.AddFields("memory", extraKStats(s, token), tags)
@@ -76,13 +79,14 @@ func (s *IllumosMemory) Gather(acc telegraf.Accumulator) error {
 		acc.AddFields("memory.cpuVm", cpuvmKStats(s, token), tags)
 	}
 
-	token.Close()
-
 	return nil
 }
 
 func extraKStats(s *IllumosMemory, token *kstat.Token) map[string]interface{} {
 	fields := make(map[string]interface{})
+
+	// My error handling here is permissive. I don't see why failing to get one kstat should stop us
+	// trying to get the rest, so errors are noted and otherwise ignored. We'll see how it goes.
 
 	if helpers.WeWant("kernel", s.ExtraFields) {
 		stat, err := token.GetNamed("unix", 0, "system_pages", "pp_kernel")
@@ -90,7 +94,7 @@ func extraKStats(s *IllumosMemory, token *kstat.Token) map[string]interface{} {
 		if err == nil {
 			fields["kernel"] = helpers.NamedValue(stat).(float64) * pageSize
 		} else {
-			log.Fatal(err)
+			log.Print("could not get kernel kstats")
 		}
 	}
 
@@ -100,7 +104,7 @@ func extraKStats(s *IllumosMemory, token *kstat.Token) map[string]interface{} {
 		if err == nil {
 			fields["freelist"] = helpers.NamedValue(stat).(float64) * pageSize
 		} else {
-			log.Fatal(err)
+			log.Print("could not get freelist kstats")
 		}
 	}
 
@@ -110,7 +114,7 @@ func extraKStats(s *IllumosMemory, token *kstat.Token) map[string]interface{} {
 		if err == nil {
 			fields["arcsize"] = helpers.NamedValue(stat).(float64)
 		} else {
-			log.Fatal(err)
+			log.Print("could not get freelist kstats")
 		}
 	}
 
@@ -123,8 +127,10 @@ func vminfoKStats(s *IllumosMemory, token *kstat.Token) map[string]interface{} {
 	fields := make(map[string]interface{})
 
 	_, vi, err := token.Vminfo()
+
 	if err != nil {
-		log.Fatal("cannot get vminfo kstats")
+		log.Print("cannot get vminfo kstats")
+		return fields
 	}
 
 	if helpers.WeWant("freemem", s.VminfoFields) {
@@ -175,11 +181,12 @@ func perCpuvmKStats(s *IllumosMemory, token *kstat.Token) cpuvmStatHolder {
 		}
 
 		stats, err := statGroup.AllNamed()
-		if err != nil {
-			log.Fatal("cannot get named cpu.vm kstats")
-		}
 
-		perCPUStats[statGroup.Instance] = parseNamedStats(s, stats)
+		if err == nil {
+			perCPUStats[statGroup.Instance] = parseNamedStats(s, stats)
+		} else {
+			log.Print("cannot get named cpu.vm kstats")
+		}
 	}
 
 	return perCPUStats
@@ -228,11 +235,7 @@ func cpuvmKStats(s *IllumosMemory, token *kstat.Token) map[string]interface{} {
 }
 
 var runSwapCmd = func() string {
-	stdout, _, err := helpers.RunCmd("/usr/sbin/swap -s")
-
-	if err != nil {
-		log.Fatal(err)
-	}
+	stdout, _, _ := helpers.RunCmd("/usr/sbin/swap -s")
 
 	return stdout
 }

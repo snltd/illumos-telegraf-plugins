@@ -41,8 +41,11 @@ var (
 func (s *IllumosNetwork) Gather(acc telegraf.Accumulator) error {
 	token, err := kstat.Open()
 	if err != nil {
-		log.Fatal("cannot get kstat token")
+		log.Print("cannot get kstat token")
+		return err
 	}
+
+	defer token.Close()
 
 	links := helpers.KStatsInModule(token, "link")
 
@@ -52,7 +55,7 @@ func (s *IllumosNetwork) Gather(acc telegraf.Accumulator) error {
 		stats, _ := link.AllNamed()
 
 		if err != nil {
-			log.Fatal("cannot get named link kstats")
+			log.Printf("cannot get named link kstats for %s\n", link.Name)
 		}
 
 		vnicMap := makeZoneVnicMap()
@@ -76,8 +79,6 @@ func (s *IllumosNetwork) Gather(acc telegraf.Accumulator) error {
 			zoneTags(zone, link.Name, vnic),
 		)
 	}
-
-	token.Close()
 
 	return nil
 }

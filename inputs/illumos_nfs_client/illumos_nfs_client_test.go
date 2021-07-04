@@ -39,7 +39,7 @@ func TestParseNamedStats(t *testing.T) {
 		NfsVersions: []string{"v4"},
 	}
 
-	testData := helpers.FromFixture("nfs:0:rfsreqcnt_v4.kstat")
+	testData := helpers.FromFixture("nfs--0--rfsreqcnt_v4.kstat")
 	fields := parseNamedStats(s, testData)
 
 	require.Equal(

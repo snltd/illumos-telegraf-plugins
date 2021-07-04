@@ -14,7 +14,7 @@ Things to note.
   is, I do not calculate rates inside Telegraf. Things like CPU usage, which
   the kernel measures as "total time spent on CPU" will just go up and up. I
   don't mind this because my graphing software
-  ([Wavefront](https://wavefront.com) lets me wrap the series in a `rate()`
+  ([Wavefront](https://wavefront.com)) lets me wrap the series in a `rate()`
   function.
 * The testing sample is very small. You may have hardware which produces
   different KStats to mine, so you may be missing tags in places. I'm thinking
@@ -31,15 +31,16 @@ Things to note.
   yourself.
 * You can only run the tests on an Illumos box. Properly mocking all the KStat
   calls wasn't something I wanted to get involved in.
-* Telegraf allocates a huge amount (~5Gb) of virtual memory. This is nothing
-  to do with my plugins, but I've seen the code fail with `ENOMEM` because of
-  a lack of swap.
 
 All of that said, I've found the plugins reliable and useful.
 
 ## Building
 
-I build on OmniOS, in a `lipkg` zone with the following packages.
+This isn't a self-contained software package. It's effectively a big patch to
+Telegraf, and you'll have to do a little work to build it.
+
+First, of course, you need a build environment. I use and OmniOS `lipkg`
+zone with the following packages.
 
 ```
 developer/build/gnu-make
@@ -49,17 +50,19 @@ ooce/developer/go-116
 
 Get the Telegraf source and pick a release. I use 1.16.3. 1.17 requires
 substantially more hacking around to build, and 1.18 allocates a huge amount
-of swap.
+of swap, which I don't like.
 
 ```
-git clone https://github.com/influxdata/telegraf.git
-cd telegraf
-git checkout v1.16.3
-vi plugins/inputs/all/all.go
+$ git clone https://github.com/influxdata/telegraf.git
+$ cd telegraf
+$ git checkout v1.16.3
+$ vi plugins/inputs/all/all.go
 ```
 
 and add these lines to the `inputs()`. Feel free to omit any you don't need:
-the fewer plugins you try to build, the lower your chance of failure!
+the fewer plugins you try to build, the lower your chance of failure! To build
+1.16.3 on my system I had to remove the `modbus`, `ecs`, and `docker` inputs,
+but normally I take out way more than that.
 
 ```go
 _ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_cpu"
@@ -71,26 +74,35 @@ _ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_network"
 _ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_nfs_client"
 _ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_nfs_server"
 _ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_patches"
-_ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_proc"
 _ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_smf"
 _ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_zfs_arc"
 _ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_zones"
 _ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_zpool"
 ```
 
-I remove the default equivalents too, since they're useless to us.
+Now add
 
 ```
-gmake
+github.com/snltd/illumos-telegraf-plugins v0.1.3
 ```
+
+to `mod.go`, and build.
+
+```
+$ gmake
+```
+
+This may well fail, and you might have to start removing stuff from the
+various `all.go` files. For 1.16.3, I had to take the `starlark` line out of
+`plugins/processors/all/all.go`. After that, `gmake` succeeded, and I got a
+`telegraf` binary.
 
 ## The Plugins
 
 ### illumos_cpu
 CPU usage, presented in nanoseconds, as per the kstats. It's up to you and
 your graphing software to make rates, percentages, or whatever you find
-useful. Can combine cores into overall stats, to keep down the point rate. Can
-also report per-zone CPU usage if running in the global.
+useful. Can report per-zone CPU usage if running in the global.
 
 ### illumos_disk_health
 Uses the `device_error` kstats to keep track of disk errors. Tries its best to

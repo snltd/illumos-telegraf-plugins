@@ -70,18 +70,21 @@ func parseCPUinfoKStats(stats []*kstat.Named) (map[string]interface{}, map[strin
 	return fields, tags
 }
 
-func gatherCPUinfoStats(acc telegraf.Accumulator, token *kstat.Token) {
+func gatherCPUinfoStats(acc telegraf.Accumulator, token *kstat.Token) error {
 	stats := helpers.KStatsInModule(token, "cpu_info")
 
 	for _, stat := range stats {
 		namedStats, err := stat.AllNamed()
 		if err != nil {
-			log.Fatal("cannot get kstat token")
+			log.Print("cannot get kstat token")
+			return err
 		}
 
 		fields, tags := parseCPUinfoKStats(namedStats)
 		acc.AddFields("cpu.info", fields, tags)
 	}
+
+	return nil
 }
 
 func parseZoneCPUKStats(stats []*kstat.Named) (map[string]interface{}, map[string]string) {
@@ -104,19 +107,22 @@ func parseZoneCPUKStats(stats []*kstat.Named) (map[string]interface{}, map[strin
 
 // metrics reporting on CPU consumption for each zone. sys and user, each as a gauge, tagged with
 // the zone name.
-func gatherZoneCPUStats(acc telegraf.Accumulator, token *kstat.Token) {
+func gatherZoneCPUStats(acc telegraf.Accumulator, token *kstat.Token) error {
 	zoneStats := helpers.KStatsInModule(token, "zones")
 
 	for _, zone := range zoneStats {
 		namedStats, err := zone.AllNamed()
 		if err != nil {
-			log.Fatal("cannot get zone CPU named stats")
+			log.Print("cannot get zone CPU named stats")
+			return err
 		}
 
 		fields, tags := parseZoneCPUKStats(namedStats)
 
 		acc.AddFields("cpu.zone", fields, tags)
 	}
+
+	return nil
 }
 
 func parseSysCPUKStats(s *IllumosCPU, stats []*kstat.Named) map[string]interface{} {
@@ -131,14 +137,15 @@ func parseSysCPUKStats(s *IllumosCPU, stats []*kstat.Named) map[string]interface
 	return fields
 }
 
-func gatherSysCPUStats(s *IllumosCPU, acc telegraf.Accumulator, token *kstat.Token) {
+func gatherSysCPUStats(s *IllumosCPU, acc telegraf.Accumulator, token *kstat.Token) error {
 	cpuStats := helpers.KStatsInModule(token, "cpu")
 
 	for _, cpu := range cpuStats {
 		if cpu.Name == "sys" {
 			namedStats, err := cpu.AllNamed()
 			if err != nil {
-				log.Fatal("cannot get CPU named stats")
+				log.Print("cannot get CPU named stats")
+				return err
 			}
 
 			acc.AddFields(
@@ -148,6 +155,8 @@ func gatherSysCPUStats(s *IllumosCPU, acc telegraf.Accumulator, token *kstat.Tok
 			)
 		}
 	}
+
+	return nil
 }
 
 func fieldToMetricPath(field string) string {
@@ -159,20 +168,35 @@ func fieldToMetricPath(field string) string {
 
 func (s *IllumosCPU) Gather(acc telegraf.Accumulator) error {
 	token, err := kstat.Open()
+	defer token.Close()
+
 	if err != nil {
-		log.Fatal("cannot get kstat token")
+		log.Print("cannot get kstat token")
+
+		return err
 	}
 
 	if s.CPUInfoStats {
-		gatherCPUinfoStats(acc, token)
+		err := gatherCPUinfoStats(acc, token)
+
+		if err != nil {
+			return err
+		}
 	}
 
 	if s.ZoneCPUStats {
-		gatherZoneCPUStats(acc, token)
+		err := gatherZoneCPUStats(acc, token)
+
+		if err != nil {
+			return err
+		}
 	}
 
-	gatherSysCPUStats(s, acc, token)
-	token.Close()
+	err = gatherSysCPUStats(s, acc, token)
+
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
