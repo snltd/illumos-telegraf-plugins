@@ -69,19 +69,19 @@ the fewer plugins you try to build, the lower your chance of failure! To build
 but normally I take out way more than that.
 
 ```go
-_ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_cpu"
-_ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_disk_health"
-_ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_fma"
-_ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_io"
-_ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_memory"
-_ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_network"
-_ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_nfs_client"
-_ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_nfs_server"
-_ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_patches"
-_ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_smf"
-_ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_zfs_arc"
-_ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_zones"
-_ "github.com/snltd/illumos-telegraf-plugins/inputs/illumos_zpool"
+_ "github.com/snltd/illumos-telegraf-plugins/inputs/cpu"
+_ "github.com/snltd/illumos-telegraf-plugins/inputs/disk_health"
+_ "github.com/snltd/illumos-telegraf-plugins/inputs/fma"
+_ "github.com/snltd/illumos-telegraf-plugins/inputs/io"
+_ "github.com/snltd/illumos-telegraf-plugins/inputs/memory"
+_ "github.com/snltd/illumos-telegraf-plugins/inputs/network"
+_ "github.com/snltd/illumos-telegraf-plugins/inputs/nfs_client"
+_ "github.com/snltd/illumos-telegraf-plugins/inputs/nfs_server"
+_ "github.com/snltd/illumos-telegraf-plugins/inputs/patches"
+_ "github.com/snltd/illumos-telegraf-plugins/inputs/smf"
+_ "github.com/snltd/illumos-telegraf-plugins/inputs/zfs_arc"
+_ "github.com/snltd/illumos-telegraf-plugins/inputs/zones"
+_ "github.com/snltd/illumos-telegraf-plugins/inputs/zpool"
 ```
 
 Now add
@@ -103,55 +103,55 @@ various `all.go` files. For 1.16.3, I had to take the `starlark` line out of
 
 ## The Plugins
 
-### illumos_cpu
+### cpu
 CPU usage, presented in nanoseconds, as per the kstats. It's up to you and
 your graphing software to make rates, percentages, or whatever you find
 useful. Can report per-zone CPU usage if running in the global.
 
-### illumos_disk_health
+### disk_health
 Uses the `device_error` kstats to keep track of disk errors. Tries its best to
 tag the metrics with information about the disks like vendor, serial number
 etc.
 
-### illumos_fma
+### fma
 A very experimental plugin which parses the output of `fmadm(1m)` and
 `fmstat(1m)` to produce information on system failures.
 
-### illumos_io
+### io
 Gets data about IO throughput.
 
-### illumos_memory
+### memory
 Aggregates virtual memory information from a number of kstats and, if you want
 it, the output of `swap(1m)`. Swapping/paging info defaults to per-cpu, but
 can be aggregated to save point rate.
 
-### illumos_network
+### network
 Collects network KStats. If Telegraf is running in the global zone, the plugin
 can present per-zone statistics.
 
-### illumos_nfs_client
+### nfs_client
 Basic measurement of NFS client stats, for all NFS protocol versions. Each
 zone has its own set of KStats, so if you want per-zone NFS stats, you'll have
 to run Telegraf in the zones.
 
-### illumos_nfs_server
+### nfs_server
 NFS server KStats. Not much more to say.
 
-## illumos_patches
+## patches
 Tells you how many of your installed packages are ready for upgrade.
 
-### illumos_smf
+### smf
 Parses the output of `svcs(1m)` to count the number of SMF services in
 particular states. Also reports errant services with sufficient tagging to
 easily track them down and fix them.
 
-### illumos_zfs_arc
+### zfs_arc
 Reports ZFS ARC statistics.
 
-### illumos_zones
+### zones
 Turns `zoneadm list` into numbers, and tells you how old your zones are.
 
-### illumos_zpool
+### zpool
 High-level ZFS pool statistics from the output of `zpool list`.
 
 ## Contributing
