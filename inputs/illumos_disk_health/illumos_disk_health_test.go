@@ -1,4 +1,4 @@
-package illumos_disk_health
+package diskhealth
 
 import (
 	"testing"

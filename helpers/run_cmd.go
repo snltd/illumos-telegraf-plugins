@@ -17,10 +17,10 @@ var RunCmd = func(cmd string) (string, string, error) {
 	var executor *exec.Cmd
 	var stdout, stderr bytes.Buffer
 
-	if len(chunks) == 2 { //nolint
-		executor = exec.Command(chunks[0], strings.Split(chunks[1], " ")...)
+	if len(chunks) == 2 { //nolint:gomnd
+		executor = exec.Command(chunks[0], strings.Split(chunks[1], " ")...) //nolint:gosec
 	} else {
-		executor = exec.Command(chunks[0])
+		executor = exec.Command(chunks[0]) //nolint:gosec
 	}
 
 	executor.Stdout = &stdout
@@ -28,11 +28,12 @@ var RunCmd = func(cmd string) (string, string, error) {
 
 	err := executor.Run()
 
-	outString := strings.TrimSpace(string(stdout.Bytes()))
-	errString := strings.TrimSpace(string(stderr.Bytes()))
+	outString := strings.TrimSpace(stdout.String())
+	errString := strings.TrimSpace(stderr.String())
 
 	if err != nil {
 		log.Printf("error running %s: %s\n", cmd, err)
+
 		return outString, errString, err
 	}
 

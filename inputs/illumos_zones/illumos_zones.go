@@ -1,4 +1,4 @@
-package illumos_zones
+package zones
 
 import (
 	"fmt"
@@ -35,6 +35,7 @@ var zoneBootTime = func(zoneName string, zoneID int) (interface{}, error) {
 	token, err := kstat.Open()
 	if err != nil {
 		log.Print("cannot get kstat token")
+
 		return nil, err
 	}
 

@@ -1,4 +1,4 @@
-package illumos_io
+package io
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// This test is sketchy. TODO - feed in some captured kstat data.
+// This test is sketchy - feed in some captured kstat data.
 func TestPlugin(t *testing.T) {
 	t.Parallel()
 

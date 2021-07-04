@@ -1,14 +1,16 @@
-package illumos_patches
+package patches
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestToUpdatePkg(t *testing.T) {
 	t.Parallel()
 
 	runPkgListCmd = func() string { return samplePkgListOutput }
+
 	require.Equal(t, 43, toUpdatePkg())
 }
 
@@ -16,6 +18,7 @@ func TestToUpdatePkgNothing(t *testing.T) {
 	t.Parallel()
 
 	runPkgListCmd = func() string { return "" }
+
 	require.Equal(t, 0, toUpdatePkg())
 }
 
@@ -23,6 +26,7 @@ func TestToUpdatePkgin(t *testing.T) {
 	t.Parallel()
 
 	runPkginUpgradeCmd = func() string { return samplePkginUpgradeOutput }
+
 	require.Equal(t, 17, toUpdatePkgin())
 }
 
@@ -30,6 +34,7 @@ func TestToUpdatePkginBadOutput(t *testing.T) {
 	t.Parallel()
 
 	runPkginUpgradeCmd = func() string { return "" }
+
 	require.Equal(t, -1, toUpdatePkgin())
 }
 

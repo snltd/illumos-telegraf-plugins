@@ -1,4 +1,4 @@
-package illumos_nfs_server
+package nfsserver
 
 import (
 	"fmt"
@@ -36,6 +36,7 @@ func (s *IllumosNfsServer) Gather(acc telegraf.Accumulator) error {
 	token, err := kstat.Open()
 	if err != nil {
 		log.Print("cannot get kstat token")
+
 		return err
 	}
 

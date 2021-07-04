@@ -1,4 +1,4 @@
-package illumos_zpool
+package zpool
 
 import (
 	"strconv"

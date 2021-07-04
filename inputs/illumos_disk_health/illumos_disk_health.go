@@ -1,4 +1,4 @@
-package illumos_disk_health
+package diskhealth
 
 import (
 	"fmt"
@@ -60,6 +60,7 @@ func (s *IllumosDiskHealth) Gather(acc telegraf.Accumulator) error {
 	token, err := kstat.Open()
 	if err != nil {
 		log.Print("cannot get kstat token")
+
 		return err
 	}
 

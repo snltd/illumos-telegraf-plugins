@@ -1,4 +1,4 @@
-package illumos_fma
+package fma
 
 import (
 	"io/ioutil"

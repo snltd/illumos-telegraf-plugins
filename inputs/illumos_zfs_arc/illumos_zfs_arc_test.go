@@ -1,4 +1,4 @@
-package illumos_zfs_arc
+package zfsarc
 
 import (
 	"testing"

@@ -33,7 +33,6 @@ linters:
     - godot
     - godox
     - gofmt
-    - gofumpt
     - goheader
     - goimports
     - golint
@@ -59,7 +58,6 @@ linters:
     - rowserrcheck
     - sqlclosecheck
     - stylecheck
-    - testpackage
     - thelper
     - tparallel
     - unconvert

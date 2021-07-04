@@ -1,4 +1,4 @@
-package illumos_cpu
+package cpu
 
 import (
 	"testing"

@@ -1,4 +1,4 @@
-package illumos_memory
+package memory
 
 import (
 	"fmt"
@@ -130,6 +130,7 @@ func vminfoKStats(s *IllumosMemory, token *kstat.Token) map[string]interface{} {
 
 	if err != nil {
 		log.Print("cannot get vminfo kstats")
+
 		return fields
 	}
 

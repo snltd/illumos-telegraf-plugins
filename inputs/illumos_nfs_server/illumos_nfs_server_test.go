@@ -1,4 +1,4 @@
-package illumos_nfs_server
+package nfsserver
 
 import (
 	"testing"

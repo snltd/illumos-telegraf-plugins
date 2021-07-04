@@ -1,4 +1,4 @@
-package illumos_zfs_arc
+package zfsarc
 
 import (
 	"log"
@@ -32,6 +32,7 @@ func (s *IllumosZfsArc) Gather(acc telegraf.Accumulator) error {
 	token, err := kstat.Open()
 	if err != nil {
 		log.Print("cannot get kstat token")
+
 		return err
 	}
 

@@ -1,4 +1,4 @@
-package illumos_fma
+package fma
 
 import (
 	"log"
@@ -101,8 +101,8 @@ func gatherFmadm(acc telegraf.Accumulator) {
 }
 
 func (s *IllumosFma) Gather(acc telegraf.Accumulator) error {
-	// TODO ? There's no error handling in here. I'm not really sure what errors we might need to
-	// handle, so if this ever gets used, it will need improvemnt.
+	// There's no error handling in here. I'm not really sure what errors we might need to handle,
+	// so if this ever gets used, it will need improvement.
 	if s.Fmstat {
 		gatherFmstat(s, acc)
 	}

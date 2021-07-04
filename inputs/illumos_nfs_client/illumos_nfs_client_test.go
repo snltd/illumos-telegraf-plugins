@@ -1,4 +1,4 @@
-package illumos_nfs_client
+package nfsclient
 
 import (
 	"testing"
