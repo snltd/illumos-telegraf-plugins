@@ -48,6 +48,10 @@ func TestPlugin(t *testing.T) {
 func TestZoneAge(t *testing.T) {
 	t.Parallel()
 
+	age, err := zoneAge("testdata/zones", "cube-ws")
+
+	require.Nil(t, err)
+	require.Equal(t, age, float64(time.Now().Unix()-zoneTimestamp("cube-ws")))
 }
 
 var zoneadmOutput = `0:global:running:/::ipkg:shared:0
@@ -77,7 +81,7 @@ var testMetrics = []telegraf.Metric{
 			"name":   "cube-ws",
 		},
 		map[string]interface{}{
-			"age": float64(time.Now().Unix() - 1623333996),
+			"age": float64(time.Now().Unix() - zoneTimestamp("cube-ws")),
 		},
 		time.Now(),
 	),
@@ -103,8 +107,16 @@ var testMetrics = []telegraf.Metric{
 			"name":   "cube-media",
 		},
 		map[string]interface{}{
-			"age": float64(time.Now().Unix() - 1623333990),
+			"age": float64(time.Now().Unix() - zoneTimestamp("cube-media")),
 		},
 		time.Now(),
 	),
+}
+
+func zoneTimestamp(zone string) int64 {
+	if zone == "cube-ws" {
+		return 1611751778 // epoch timestamp of cube-ws.xml test file. 2021-01-27T12:49
+	}
+
+	return 1588780462
 }

@@ -25,7 +25,7 @@ func TestParseNamedStats(t *testing.T) {
 		Tags:    []string{"Vendor", "Serial No", "Product", "Revision"},
 	}
 
-	testData := helpers.FromFixture("sderr:6:sd6,err.kstat")
+	testData := helpers.FromFixture("sderr--6--sd6,err.kstat")
 	fields, tags := parseNamedStats(s, testData)
 
 	require.Equal(

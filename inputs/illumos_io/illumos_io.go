@@ -125,8 +125,11 @@ func createTags(token *kstat.Token, mod, device string) map[string]string {
 func (s *IllumosIO) Gather(acc telegraf.Accumulator) error {
 	token, err := kstat.Open()
 	if err != nil {
-		log.Fatal("cannot get kstat token")
+		log.Print("cannot get kstat token")
+		return err
 	}
+
+	defer token.Close()
 
 	ioStats := helpers.KStatIoClass(token, "disk")
 
@@ -146,7 +149,6 @@ func (s *IllumosIO) Gather(acc telegraf.Accumulator) error {
 		)
 	}
 
-	token.Close()
 	return nil
 }
 

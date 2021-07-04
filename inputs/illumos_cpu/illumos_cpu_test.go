@@ -12,7 +12,7 @@ import (
 func TestParseCPUinfoKStats(t *testing.T) {
 	t.Parallel()
 
-	testData := helpers.FromFixture("cpu_info:0:cpu_info0.kstat")
+	testData := helpers.FromFixture("cpu_info--0--cpu_info0.kstat")
 	fields, tags := parseCPUinfoKStats(testData)
 
 	require.Equal(
@@ -38,7 +38,7 @@ func TestParseCPUinfoKStats(t *testing.T) {
 func TestParseZoneCPUKStats(t *testing.T) {
 	t.Parallel()
 
-	testData := helpers.FromFixture("zones:5:cube-ws.kstat")
+	testData := helpers.FromFixture("zones--5--cube-ws.kstat")
 	fields, tags := parseZoneCPUKStats(testData)
 
 	require.Equal(
@@ -66,7 +66,7 @@ func TestParseSysCPUKStats(t *testing.T) {
 		SysFields: []string{"cpu_nsec_dtrace", "cpu_nsec_intr", "cpu_nsec_kernel", "cpu_nsec_user"},
 	}
 
-	testData := helpers.FromFixture("cpu:3:sys.kstat")
+	testData := helpers.FromFixture("cpu--3--sys.kstat")
 	fields := parseSysCPUKStats(s, testData)
 
 	require.Equal(

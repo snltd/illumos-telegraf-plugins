@@ -128,7 +128,7 @@ func TestParseNamedStats(t *testing.T) {
 		CpuvmAggregate: false,
 	}
 
-	testData := helpers.FromFixture("cpu:0:vm.kstat")
+	testData := helpers.FromFixture("cpu--0--vm.kstat")
 	fields := parseNamedStats(s, testData)
 
 	require.Equal(
