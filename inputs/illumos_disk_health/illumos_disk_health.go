@@ -59,7 +59,8 @@ func parseNamedStats(s *IllumosDiskHealth, stats []*kstat.Named) (map[string]int
 func (s *IllumosDiskHealth) Gather(acc telegraf.Accumulator) error {
 	token, err := kstat.Open()
 	if err != nil {
-		log.Fatal("cannot get kstat token")
+		log.Print("cannot get kstat token")
+		return err
 	}
 
 	statList := helpers.KStatsInClass(token, "device_error")

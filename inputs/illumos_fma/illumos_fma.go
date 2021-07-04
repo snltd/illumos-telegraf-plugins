@@ -46,7 +46,7 @@ var runFmstatCmd = func() string {
 	stdout, _, err := helpers.RunCmdPfexec("/usr/sbin/fmstat")
 
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 
 	return stdout
@@ -56,7 +56,7 @@ var runFmadmFaultyCmd = func() string {
 	stdout, _, err := helpers.RunCmdPfexec("/usr/sbin/fmadm faulty")
 
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 
 	return stdout
@@ -101,6 +101,8 @@ func gatherFmadm(acc telegraf.Accumulator) {
 }
 
 func (s *IllumosFma) Gather(acc telegraf.Accumulator) error {
+	// TODO ? There's no error handling in here. I'm not really sure what errors we might need to
+	// handle, so if this ever gets used, it will need improvemnt.
 	if s.Fmstat {
 		gatherFmstat(s, acc)
 	}

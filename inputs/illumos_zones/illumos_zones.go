@@ -2,14 +2,15 @@ package illumos_zones
 
 import (
 	"fmt"
-	"github.com/illumos/go-kstat"
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
-	"github.com/snltd/illumos-telegraf-plugins/helpers"
 	"log"
 	"os"
 	"path"
 	"time"
+
+	"github.com/illumos/go-kstat"
+	"github.com/influxdata/telegraf"
+	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/snltd/illumos-telegraf-plugins/helpers"
 )
 
 func (z *IllumosZones) Description() string {
@@ -33,11 +34,13 @@ func (z *IllumosZones) Gather(acc telegraf.Accumulator) error {
 var zoneBootTime = func(zoneName string, zoneID int) (interface{}, error) {
 	token, err := kstat.Open()
 	if err != nil {
-		log.Fatal("cannot get kstat token")
+		log.Print("cannot get kstat token")
+		return nil, err
 	}
 
+	defer token.Close()
+
 	bootTime, err := token.GetNamed("zones", zoneID, zoneName, "boot_time")
-	token.Close()
 
 	// Not being able to get a zone boot time probably isn't really an error. It just means the zone
 	// isn't running.

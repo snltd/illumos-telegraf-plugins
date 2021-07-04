@@ -23,7 +23,7 @@ func main() {
 	}
 
 	kstatName := os.Args[1]
-	file := fmt.Sprintf("%s.kstat", kstatName)
+	file := fmt.Sprintf("%s.kstat", strings.ReplaceAll(kstatName, ":", "--"))
 	chunks := strings.Split(kstatName, ":")
 
 	if len(chunks) != 3 { //nolint
