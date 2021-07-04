@@ -5,10 +5,11 @@ Collects information about Illumos CPU usage. The values it outputs are the raw 
 which means they are counters, and they only go up. I wrap them in a rate() function in
 Wavefront, which is plenty good enough for me.
 
-TODO: add option to aggregate CPU metrics across all cores and/or CPUs.
-TODO: deal with multiple cores AND multiple physical processors. I don't have a machine with the
-      latter.
-TODO: emit rates rather than raw values. This would let us do proper percentages.
+Features to add, possibly:
+	- option to aggregate CPU metrics across all cores and/or CPUs.
+	- deal with multiple cores AND multiple physical processors. I don't have a machine with the
+	  latter.
+	- emit rates rather than raw values. This would let us do proper percentages.
 */
 
 import (
