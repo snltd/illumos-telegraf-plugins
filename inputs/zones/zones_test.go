@@ -115,8 +115,8 @@ var testMetrics = []telegraf.Metric{
 
 func zoneTimestamp(zone string) int64 {
 	if zone == "cube-ws" {
-		return 1611751778 // epoch timestamp of cube-ws.xml test file. 2021-01-27T12:49
+		return 1588780462 // epoch timestamp of cube-ws.xml test file. 2021-01-27T12:49
 	}
 
-	return 1588780462
+	return 1611751778
 }
