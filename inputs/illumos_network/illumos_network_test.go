@@ -1,4 +1,4 @@
-package illumos_network
+package network
 
 import (
 	"testing"

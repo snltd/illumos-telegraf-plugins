@@ -34,7 +34,6 @@ type ZoneVnicMap map[string]Vnic
 // NewZoneMap creates a ZoneMap describing the current state of the system.
 func NewZoneMap() ZoneMap {
 	stdout, _, err := RunCmd("/usr/sbin/zoneadm list -cp")
-
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -44,7 +43,6 @@ func NewZoneMap() ZoneMap {
 
 func NewZoneVnicMap() ZoneVnicMap {
 	stdout, _, err := RunCmd("/usr/sbin/dladm show-vnic -po link,zone,over,speed")
-
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -90,7 +88,6 @@ func (z ZoneMap) InState(state string) []string {
 // ZoneName returns the name of the current zone.
 func ZoneName() string {
 	stdout, _, err := RunCmd("/bin/zonename")
-
 	if err != nil {
 		log.Fatal("could not get zonename")
 	}

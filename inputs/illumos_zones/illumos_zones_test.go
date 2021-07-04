@@ -1,4 +1,4 @@
-package illumos_zones
+package zones
 
 import (
 	"testing"

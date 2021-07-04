@@ -18,7 +18,7 @@ func TestKStatsInClass(t *testing.T) {
 		return allKStatsFromFixtures()
 	}
 
-	var statNames []string
+	statNames := []string{}
 
 	for _, stat := range KStatsInClass(&kstat.Token{}, "errorq") {
 		statNames = append(statNames, stat.Name)

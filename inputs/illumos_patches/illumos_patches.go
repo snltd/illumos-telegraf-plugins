@@ -1,4 +1,4 @@
-package illumos_patches
+package patches
 
 import (
 	"log"
@@ -106,11 +106,7 @@ func havePkgin() bool {
 func haveFile(file string) bool {
 	_, err := os.Stat(file)
 
-	if err == nil {
-		return true
-	} else {
-		return false
-	}
+	return err == nil
 }
 
 func init() {

@@ -17,6 +17,7 @@ func FromFixture(filename string) []*kstat.Named {
 
 	filename = filepath.Join("testdata", filename)
 	raw, err := os.Open(filename)
+
 	if err != nil {
 		log.Fatal(fmt.Sprintf("Could not load serialized data from disk: %v\n", err))
 	}

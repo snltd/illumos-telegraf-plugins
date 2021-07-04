@@ -1,4 +1,4 @@
-package illumos_memory
+package memory
 
 import (
 	"fmt"

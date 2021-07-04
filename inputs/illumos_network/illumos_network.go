@@ -1,4 +1,4 @@
-package illumos_network
+package network
 
 import (
 	"fmt"
@@ -42,6 +42,7 @@ func (s *IllumosNetwork) Gather(acc telegraf.Accumulator) error {
 	token, err := kstat.Open()
 	if err != nil {
 		log.Print("cannot get kstat token")
+
 		return err
 	}
 

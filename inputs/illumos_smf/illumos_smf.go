@@ -1,4 +1,4 @@
-package illumos_smf
+package smf
 
 import (
 	"log"

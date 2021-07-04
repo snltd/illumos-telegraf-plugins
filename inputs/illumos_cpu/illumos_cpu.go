@@ -1,4 +1,4 @@
-package illumos_cpu
+package cpu
 
 /*
 Collects information about Illumos CPU usage. The values it outputs are the raw kstat values,
@@ -77,6 +77,7 @@ func gatherCPUinfoStats(acc telegraf.Accumulator, token *kstat.Token) error {
 		namedStats, err := stat.AllNamed()
 		if err != nil {
 			log.Print("cannot get kstat token")
+
 			return err
 		}
 
@@ -114,6 +115,7 @@ func gatherZoneCPUStats(acc telegraf.Accumulator, token *kstat.Token) error {
 		namedStats, err := zone.AllNamed()
 		if err != nil {
 			log.Print("cannot get zone CPU named stats")
+
 			return err
 		}
 
@@ -145,6 +147,7 @@ func gatherSysCPUStats(s *IllumosCPU, acc telegraf.Accumulator, token *kstat.Tok
 			namedStats, err := cpu.AllNamed()
 			if err != nil {
 				log.Print("cannot get CPU named stats")
+
 				return err
 			}
 
@@ -168,7 +171,6 @@ func fieldToMetricPath(field string) string {
 
 func (s *IllumosCPU) Gather(acc telegraf.Accumulator) error {
 	token, err := kstat.Open()
-	defer token.Close()
 
 	if err != nil {
 		log.Print("cannot get kstat token")
@@ -176,9 +178,10 @@ func (s *IllumosCPU) Gather(acc telegraf.Accumulator) error {
 		return err
 	}
 
+	defer token.Close()
+
 	if s.CPUInfoStats {
 		err := gatherCPUinfoStats(acc, token)
-
 		if err != nil {
 			return err
 		}
@@ -186,7 +189,6 @@ func (s *IllumosCPU) Gather(acc telegraf.Accumulator) error {
 
 	if s.ZoneCPUStats {
 		err := gatherZoneCPUStats(acc, token)
-
 		if err != nil {
 			return err
 		}

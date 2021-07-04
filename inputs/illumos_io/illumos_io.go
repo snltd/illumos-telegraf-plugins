@@ -1,4 +1,4 @@
-package illumos_io
+package io
 
 import (
 	"fmt"
@@ -38,7 +38,7 @@ type IllumosIO struct {
 	Modules []string
 }
 
-func extractFields(s *IllumosIO, stat *kstat.IO) map[string]interface{} {
+func extractFields(s *IllumosIO, stat *kstat.IO) map[string]interface{} { //nolint:cyclop
 	fields := make(map[string]interface{})
 
 	if helpers.WeWant("nread", s.Fields) {
@@ -126,6 +126,7 @@ func (s *IllumosIO) Gather(acc telegraf.Accumulator) error {
 	token, err := kstat.Open()
 	if err != nil {
 		log.Print("cannot get kstat token")
+
 		return err
 	}
 

@@ -48,6 +48,10 @@ developer/versioning/git
 ooce/developer/go-116
 ```
 
+I also have `golangci-lint` installed, because I am an insane masochist who
+apparently doesn't think Go has enough petty and arbitrary rules built into
+it.
+
 Get the Telegraf source and pick a release. I use 1.16.3. 1.17 requires
 substantially more hacking around to build, and 1.18 allocates a huge amount
 of swap, which I don't like.
