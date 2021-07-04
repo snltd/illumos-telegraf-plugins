@@ -16,7 +16,7 @@ func TestParseNamedStats(t *testing.T) {
 		Zones:  []string{"cube-dns"},
 	}
 
-	testData := helpers.FromFixture("link:0:dns_net0.kstat")
+	testData := helpers.FromFixture("link--0--dns_net0.kstat")
 	fields := parseNamedStats(s, testData)
 
 	require.Equal(
@@ -39,7 +39,7 @@ func TestParseNamedStatsNoSelectedNics(t *testing.T) {
 		Vnics:  []string{"net0"},
 	}
 
-	testData := helpers.FromFixture("link:0:dns_net0.kstat")
+	testData := helpers.FromFixture("link--0--dns_net0.kstat")
 	fields := parseNamedStats(s, testData)
 	require.Equal(t, map[string]interface{}{}, fields)
 }

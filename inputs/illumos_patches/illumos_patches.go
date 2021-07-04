@@ -1,13 +1,14 @@
 package illumos_patches
 
 import (
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
-	"github.com/snltd/illumos-telegraf-plugins/helpers"
 	"log"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/influxdata/telegraf"
+	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/snltd/illumos-telegraf-plugins/helpers"
 )
 
 const (
@@ -89,11 +90,7 @@ var runPkgListCmd = func() string {
 }
 
 var runPkginUpgradeCmd = func() string {
-	stdout, _, err := helpers.RunCmd("echo n | /opt/local/bin/pkgin upgrade")
-
-	if err != nil {
-		log.Fatal(err)
-	}
+	stdout, _, _ := helpers.RunCmd("echo n | /opt/local/bin/pkgin upgrade")
 
 	return stdout
 }

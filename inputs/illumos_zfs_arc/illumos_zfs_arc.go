@@ -31,8 +31,11 @@ type IllumosZfsArc struct {
 func (s *IllumosZfsArc) Gather(acc telegraf.Accumulator) error {
 	token, err := kstat.Open()
 	if err != nil {
-		log.Fatal("cannot get kstat token")
+		log.Print("cannot get kstat token")
+		return err
 	}
+
+	defer token.Close()
 
 	stats := helpers.KStatsInModule(token, "zfs")
 
@@ -40,19 +43,17 @@ func (s *IllumosZfsArc) Gather(acc telegraf.Accumulator) error {
 		if statGroup.Name == "arcstats" {
 			namedStats, err := statGroup.AllNamed()
 
-			if err != nil {
-				log.Fatal("failed to get named ZFS arcstats")
+			if err == nil {
+				acc.AddFields(
+					"zfs.arcstats",
+					parseNamedStats(s, namedStats),
+					map[string]string{},
+				)
+			} else {
+				log.Printf("failed to get named ZFS arcstats for %s\n", statGroup.Name)
 			}
-
-			acc.AddFields(
-				"zfs.arcstats",
-				parseNamedStats(s, namedStats),
-				map[string]string{},
-			)
 		}
 	}
-
-	token.Close()
 
 	return nil
 }

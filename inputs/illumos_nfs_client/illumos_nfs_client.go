@@ -35,8 +35,11 @@ type IllumosNfsClient struct {
 func (s *IllumosNfsClient) Gather(acc telegraf.Accumulator) error {
 	token, err := kstat.Open()
 	if err != nil {
-		log.Fatal("cannot get kstat token")
+		log.Print("cannot get kstat token")
+		return err
 	}
+
+	defer token.Close()
 
 	stats := helpers.KStatsInModule(token, "nfs")
 
@@ -52,18 +55,17 @@ func (s *IllumosNfsClient) Gather(acc telegraf.Accumulator) error {
 		}
 
 		stats, err := stat.AllNamed()
-		if err != nil {
-			log.Fatal("cannot get named NFS client kstats")
+
+		if err == nil {
+			acc.AddFields(
+				"nfs.client",
+				parseNamedStats(s, stats),
+				map[string]string{"nfsVersion": nfsVersion},
+			)
+		} else {
+			log.Printf("cannot get named NFS client kstats for %s\n", stat.Name)
 		}
-
-		acc.AddFields(
-			"nfs.client",
-			parseNamedStats(s, stats),
-			map[string]string{"nfsVersion": nfsVersion},
-		)
 	}
-
-	token.Close()
 
 	return nil
 }
