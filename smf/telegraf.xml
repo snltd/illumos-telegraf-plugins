@@ -1,0 +1,33 @@
+<?xml version='1.0'?>
+<!DOCTYPE service_bundle SYSTEM '/usr/share/lib/xml/dtd/service_bundle.dtd.1'>
+<service_bundle type='manifest' name='export'>
+  <service name='sysdef/telegraf' type='service' version='0'>
+    <create_default_instance enabled='true'/>
+    <single_instance/>
+    <dependency name='physical' grouping='require_all' restart_on='none' type='service'>
+      <service_fmri value='svc:/network/physical:default'/>
+    </dependency>
+    <dependency name='fs-local' grouping='require_all' restart_on='none' type='service'>
+      <service_fmri value='svc:/system/filesystem/local'/>
+    </dependency>
+    <exec_method name='start'
+      type='method'
+      exec='/lib/svc/method/telegraf.sh'
+      timeout_seconds='60'>
+     <method_context>
+      <method_credential
+        user='daemon'
+        group='bin'
+        privileges='basic,file_dac_search'/>
+      </method_context>
+    </exec_method>
+    <exec_method name='stop' type='method' exec=':kill' timeout_seconds='10'/>
+    <exec_method name='refresh' type='method' exec=':kill -THAW' timeout_seconds='60'/>
+    <stability value='Unstable'/>
+    <template>
+      <common_name>
+        <loctext xml:lang='C'>Run Telegraf agent</loctext>
+      </common_name>
+    </template>
+  </service>
+</service_bundle>

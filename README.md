@@ -84,13 +84,16 @@ _ "github.com/snltd/illumos-telegraf-plugins/inputs/zones"
 _ "github.com/snltd/illumos-telegraf-plugins/inputs/zpool"
 ```
 
-Now add
+Now add the latest tag in this repo to `go.mod`. Get it with `git tag`, or
+look at [the releases
+page](https://github.com/snltd/illumos-telegraf-plugins/releases). Don't
+forget the `v`! For example:
 
 ```
-github.com/snltd/illumos-telegraf-plugins v0.1.3
+github.com/snltd/illumos-telegraf-plugins v0.2.0
 ```
 
-to `mod.go`, and build.
+Now you can build Telegraf.
 
 ```
 $ gmake
@@ -100,6 +103,9 @@ This may well fail, and you might have to start removing stuff from the
 various `all.go` files. For 1.16.3, I had to take the `starlark` line out of
 `plugins/processors/all/all.go`. After that, `gmake` succeeded, and I got a
 `telegraf` binary.
+
+Once you have a binary, the [`smf` directory](smf) contains just enough SMF to
+get you going.
 
 ## The Plugins
 
