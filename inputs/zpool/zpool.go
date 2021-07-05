@@ -1,6 +1,7 @@
 package zpool
 
 import (
+	"log"
 	"strconv"
 	"strings"
 
@@ -28,7 +29,12 @@ func (s *IllumosZpool) SampleConfig() string {
 }
 
 var zpoolOutput = func() string {
-	stdout, _, _ := helpers.RunCmd("/usr/sbin/zpool list")
+	stdout, stderr, err := helpers.RunCmd("/usr/sbin/zpool list")
+
+	if err != nil {
+		log.Print(stderr)
+		log.Print(err)
+	}
 
 	return stdout
 }

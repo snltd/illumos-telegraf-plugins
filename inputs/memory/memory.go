@@ -236,7 +236,12 @@ func cpuvmKStats(s *IllumosMemory, token *kstat.Token) map[string]interface{} {
 }
 
 var runSwapCmd = func() string {
-	stdout, _, _ := helpers.RunCmd("/usr/sbin/swap -s")
+	stdout, stderr, err := helpers.RunCmd("/usr/sbin/swap -s")
+
+	if err != nil {
+		log.Print(stderr)
+		log.Print(err)
+	}
 
 	return stdout
 }

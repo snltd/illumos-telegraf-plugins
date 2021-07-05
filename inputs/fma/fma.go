@@ -43,9 +43,10 @@ func (s *IllumosFma) SampleConfig() string {
 }
 
 var runFmstatCmd = func() string {
-	stdout, _, err := helpers.RunCmdPfexec("/usr/sbin/fmstat")
+	stdout, stderr, err := helpers.RunCmdPfexec("/usr/sbin/fmstat")
 
 	if err != nil {
+		log.Print(stderr)
 		log.Print(err)
 	}
 
@@ -53,9 +54,10 @@ var runFmstatCmd = func() string {
 }
 
 var runFmadmFaultyCmd = func() string {
-	stdout, _, err := helpers.RunCmdPfexec("/usr/sbin/fmadm faulty")
+	stdout, stderr, err := helpers.RunCmdPfexec("/usr/sbin/fmadm faulty")
 
 	if err != nil {
+		log.Print(stderr)
 		log.Print(err)
 	}
 

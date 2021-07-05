@@ -3,7 +3,6 @@ package helpers
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"os/exec"
 	"strings"
 )
@@ -31,13 +30,7 @@ var RunCmd = func(cmd string) (string, string, error) {
 	outString := strings.TrimSpace(stdout.String())
 	errString := strings.TrimSpace(stderr.String())
 
-	if err != nil {
-		log.Printf("error running %s: %s\n", cmd, err)
-
-		return outString, errString, err
-	}
-
-	return outString, errString, nil
+	return outString, errString, err
 }
 
 // RunCmdPfexec runs a command via pfexec(1), returning its output as a string. Same caveats as

@@ -90,7 +90,12 @@ var runPkgListCmd = func() string {
 }
 
 var runPkginUpgradeCmd = func() string {
-	stdout, _, _ := helpers.RunCmd("echo n | /opt/local/bin/pkgin upgrade")
+	stdout, stderr, err := helpers.RunCmd("echo n | /opt/local/bin/pkgin upgrade")
+
+	if err != nil {
+		log.Print(stderr)
+		log.Print(err)
+	}
 
 	return stdout
 }
