@@ -59,28 +59,21 @@ func TestParseFmstatHeader(t *testing.T) {
 	)
 }
 
-func TestFmadmImpacts(t *testing.T) {
+func TestParseFmadmImpact(t *testing.T) {
 	t.Parallel()
 
-	runFmadmFaultyCmd = func() string {
-		ret, _ := ioutil.ReadFile("testdata/fmadm_output.txt")
-
-		return string(ret)
-	}
-
-	require.ElementsMatch(
+	require.Equal(
 		t,
-		[]string{
-			"fault.fs.zfs.vdev.checksum",
-			"fault.fs.zfs.vdev.io",
-			"fault.fs.zfs.vdev.io",
-			"fault.fs.zfs.vdev.io",
-			"fault.fs.zfs.vdev.probe_failure",
-			"fault.fs.zfs.vdev.probe_failure",
-			"fault.fs.zfs.vdev.probe_failure",
-			"fault.io.pciex.device-interr-corr",
+		map[string]string{
+			"module":            "mem",
+			"motherboard":       "0",
+			"chip":              "0",
+			"memory-controller": "0",
+			"dimm":              "0",
+			"rank":              "0",
+			"status":            "faulty",
 		},
-		fmadmImpacts(),
+		parseFmadmImpact("mem:///motherboard=0/chip=0/memory-controller=0/dimm=0/rank=0       faulty"),
 	)
 }
 
@@ -120,12 +113,14 @@ func TestPlugin(t *testing.T) {
 var testMetrics = []telegraf.Metric{
 	testutil.MustMetric(
 		"fma.fmadm",
-		map[string]string{},
+		map[string]string{
+			"module": "zfs",
+			"pool":   "big",
+			"vdev":   "3706b5d93e20f727",
+			"status": "faulted",
+		},
 		map[string]interface{}{
-			"fault_fs_zfs_vdev_checksum":        1,
-			"fault_fs_zfs_vdev_io":              3,
-			"fault_fs_zfs_vdev_probe_failure":   3,
-			"fault_io_pciex_device-interr-corr": 1,
+			"faults": 1,
 		},
 		time.Now(),
 	),

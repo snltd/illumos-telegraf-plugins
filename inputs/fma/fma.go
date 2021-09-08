@@ -54,7 +54,7 @@ var runFmstatCmd = func() string {
 }
 
 var runFmadmFaultyCmd = func() string {
-	stdout, stderr, err := helpers.RunCmdPfexec("/usr/sbin/fmadm faulty")
+	stdout, stderr, err := helpers.RunCmdPfexec("/usr/sbin/fmadm faulty -arf")
 
 	if err != nil {
 		log.Print(stderr)
@@ -62,6 +62,20 @@ var runFmadmFaultyCmd = func() string {
 	}
 
 	return stdout
+}
+
+func (s *IllumosFma) Gather(acc telegraf.Accumulator) error {
+	// There's no error handling in here. I'm not really sure what errors we might need to handle,
+	// so if this ever gets used, it will need improvement.
+	if s.Fmstat {
+		gatherFmstat(s, acc)
+	}
+
+	if s.Fmadm {
+		gatherFmadm(acc)
+	}
+
+	return nil
 }
 
 func gatherFmstat(s *IllumosFma, acc telegraf.Accumulator) {
@@ -86,34 +100,27 @@ func gatherFmstat(s *IllumosFma, acc telegraf.Accumulator) {
 	}
 }
 
+// I originally wrote this module for Solaris, which provides significantly more information on
+// fmadm faults than Illumos does. Lacking that, I've fallen back to the short form of `fmadm
+// faulty -arf`. This outputs one fault per line, of the form
+//
+//    zfs://pool=big/vdev=3706b5d93e20f727                                  faulted
+//
+// Problem is, I've only seen that one fault since I wrote this plugin, plus another example I
+// found in the Illumos source! So this function, and
+// probably the rest of this plugin, could be subject to severe revision.
+// So far as I can tell, impacts are unique, so we send a value of "1" for every impact.
+//
 func gatherFmadm(acc telegraf.Accumulator) {
-	fields := make(map[string]interface{})
-	fmadmCounts := make(map[string]int)
+	raw := runFmadmFaultyCmd()
 
-	for _, impact := range fmadmImpacts() {
-		safeName := strings.ReplaceAll(impact, ".", "_")
-		fmadmCounts[safeName]++
+	for _, impact := range strings.Split(raw, "\n") {
+		if strings.Contains(impact, "://") {
+			acc.AddFields("fma.fmadm",
+				map[string]interface{}{"faults": 1},
+				parseFmadmImpact(impact))
+		}
 	}
-
-	for stat, value := range fmadmCounts {
-		fields[stat] = value
-	}
-
-	acc.AddFields("fma.fmadm", fields, map[string]string{})
-}
-
-func (s *IllumosFma) Gather(acc telegraf.Accumulator) error {
-	// There's no error handling in here. I'm not really sure what errors we might need to handle,
-	// so if this ever gets used, it will need improvement.
-	if s.Fmstat {
-		gatherFmstat(s, acc)
-	}
-
-	if s.Fmadm {
-		gatherFmadm(acc)
-	}
-
-	return nil
 }
 
 func parseFmstatHeader(headerLine string) []string {
@@ -144,15 +151,19 @@ func parseFmstatLine(fmstatLine string, header []string) Fmstat {
 	}
 }
 
-func fmadmImpacts() []string {
-	raw := runFmadmFaultyCmd()
-	lines := strings.Split(raw, "\n")
+func parseFmadmImpact(impact string) map[string]string {
+	ret := make(map[string]string)
 
-	var ret []string
+	fields := strings.Fields(impact)
+	ret["status"] = fields[1]
 
-	for _, line := range lines {
-		if strings.Contains(line, "Problem class") {
-			ret = append(ret, strings.Split(line, " : ")[1])
+	parts := strings.Split(fields[0], "://")
+	ret["module"] = parts[0]
+
+	for _, chunk := range strings.Split(parts[1], "/") {
+		if strings.Contains(chunk, "=") {
+			bits := strings.Split(chunk, "=")
+			ret[bits[0]] = bits[1]
 		}
 	}
 
