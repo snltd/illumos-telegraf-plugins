@@ -1,7 +1,6 @@
 package diskhealth
 
 import (
-	"fmt"
 	"log"
 	"strings"
 
@@ -47,7 +46,7 @@ func parseNamedStats(s *IllumosDiskHealth, stats []*kstat.Named) (map[string]int
 		case helpers.WeWant(stat.Name, s.Fields):
 			fields[camelCase(stat.Name)] = helpers.NamedValue(stat).(float64)
 		case stat.Name == "Size" && helpers.WeWant("Size", s.Tags):
-			tags["size"] = fmt.Sprintf("%d", helpers.NamedValue(stat))
+			tags["size"] = helpers.UnBytify(helpers.NamedValue(stat).(float64))
 		case helpers.WeWant(stat.Name, s.Tags):
 			tags[camelCase(stat.Name)] = strings.TrimSpace(stat.StringVal)
 		}

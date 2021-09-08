@@ -52,3 +52,44 @@ func TestBytifyI(t *testing.T) {
 		require.Equal(t, table.out, result)
 	}
 }
+
+func TestUnBytify(t *testing.T) {
+	t.Parallel()
+
+	tables := []struct {
+		in  float64
+		out string
+	}{
+		{15, "15b"},
+		{2048, "2.0Kb"},
+		{2560, "2.5Kb"},
+		{838860800, "800.0Mb"},
+		{6120000000, "5.7Gb"},
+	}
+
+	for _, table := range tables {
+		result := UnBytify(table.in)
+		require.Equal(t, table.out, result)
+	}
+}
+
+func TestUnBytifyI(t *testing.T) {
+	t.Parallel()
+
+	tables := []struct {
+		in  float64
+		out string
+	}{
+		{15, "15b"},
+		{2000, "2.0Kib"},
+		{2560, "2.6Kib"},
+		{800000000, "800.0Mib"},
+		{-6120000000, "-6.1Gib"},
+		{500000000000, "500.0Gib"},
+	}
+
+	for _, table := range tables {
+		result := UnBytifyI(table.in)
+		require.Equal(t, table.out, result)
+	}
+}
