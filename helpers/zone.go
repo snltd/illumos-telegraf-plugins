@@ -117,7 +117,7 @@ func ParseZones(raw string) ZoneMap {
 func parseZone(raw string) (Zone, error) {
 	chunks := strings.Split(raw, ":")
 
-	if len(chunks) != 8 { //nolint
+	if len(chunks) != 8 {
 		return Zone{}, fmt.Errorf("found %d fields", len(chunks))
 	}
 

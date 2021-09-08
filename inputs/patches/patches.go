@@ -79,8 +79,17 @@ func toUpdatePkgin() int {
 }
 
 var runPkgListCmd = func() string {
+	// This needs elevated privileges
+	stdout, stderr, err := helpers.RunCmd("/usr/bin/ppriv -D -e /bin/pkg refresh")
+
+	if err != nil {
+		log.Print(stdout)
+		log.Print(stderr)
+		log.Print(err)
+	}
+
 	// For reasons I can't explain, this command exits 1 if there are no packages to upgrade.
-	stdout, stderr, err := helpers.RunCmd("/bin/pkg list -uH")
+	stdout, stderr, err = helpers.RunCmd("/bin/pkg list -uH")
 
 	if err != nil && stderr != "no packages have newer versions available" {
 		log.Print(err)

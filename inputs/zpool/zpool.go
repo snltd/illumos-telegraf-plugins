@@ -81,7 +81,7 @@ func healthtoi(health string) int {
 		}
 	}
 
-	return 99 //nolint
+	return 99
 }
 
 // Zpool stores all the Zpool properties in the `props` map, which is dynamically generated. This
