@@ -56,7 +56,7 @@ func getUsage(pid string) prusageT {
 }
 
 func main() {
-	if len(os.Args) != 2 { //nolint
+	if len(os.Args) != 2 {
 		fmt.Fprintln(os.Stderr, "usage: capture-proc <pid>")
 		os.Exit(1)
 	}

@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-	if len(os.Args) != 2 { //nolint
+	if len(os.Args) != 2 {
 		fmt.Fprintln(os.Stderr, "usage: capture-kstat <kstat>")
 		os.Exit(1)
 	}
@@ -26,7 +26,7 @@ func main() {
 	file := fmt.Sprintf("%s.kstat", strings.ReplaceAll(kstatName, ":", "--"))
 	chunks := strings.Split(kstatName, ":")
 
-	if len(chunks) != 3 { //nolint
+	if len(chunks) != 3 {
 		fmt.Fprintln(os.Stderr, "kstat must be of the form module:instance:name")
 		os.Exit(1)
 	}
