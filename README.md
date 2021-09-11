@@ -63,10 +63,8 @@ $ git checkout v1.16.3
 $ vi plugins/inputs/all/all.go
 ```
 
-and add these lines to the `inputs()`. Feel free to omit any you don't need:
-the fewer plugins you try to build, the lower your chance of failure! To build
-1.16.3 on my system I had to remove the `modbus`, `ecs`, and `docker` inputs,
-but normally I take out way more than that.
+and add the following lines to the `inputs()`. Feel free to omit any you don't
+need
 
 ```go
 _ "github.com/snltd/illumos-telegraf-plugins/inputs/cpu"
@@ -83,6 +81,11 @@ _ "github.com/snltd/illumos-telegraf-plugins/inputs/zfs_arc"
 _ "github.com/snltd/illumos-telegraf-plugins/inputs/zones"
 _ "github.com/snltd/illumos-telegraf-plugins/inputs/zpool"
 ```
+
+Certain linux-centric plugins will break a Telegraf build on Illumos.  To
+build 1.16.3 on my system I had to remove the `modbus`, `ecs`, and `docker`
+inputs, but normally I take out way more than that. I pretty much only leave
+in the things I actually need.
 
 Now add the latest tag in this repo to `go.mod`. Get it with `git tag`, or
 look at [the releases
@@ -143,8 +146,10 @@ to run Telegraf in the zones.
 ### nfs_server
 NFS server KStats. Not much more to say.
 
-## patches
-Tells you how many of your installed packages are ready for upgrade.
+### patches
+Tells you how many of your installed packages are ready for upgrade. Needs
+something going round refreshing the package cache, because it can't do it
+itself.
 
 ### smf
 Parses the output of `svcs(1m)` to count the number of SMF services in
