@@ -16,11 +16,15 @@ const (
 	pkgin = "/opt/local/bin/pkgin"
 )
 
-var sampleConfig = ""
+var sampleConfig = `
+	## Whether you wish this plugin to try to refresh the package database. Personally, I wouldn't.
+	# refresh = false
+`
 
 type IllumosPatches struct {
 	Installed   bool
 	Upgradeable bool
+	Refresh     bool
 }
 
 func (s *IllumosPatches) Description() string {
@@ -33,6 +37,10 @@ func (s *IllumosPatches) SampleConfig() string {
 
 func (s *IllumosPatches) Gather(acc telegraf.Accumulator) error {
 	if havePkg5() {
+		if s.Refresh {
+			refreshPkg()
+		}
+
 		acc.AddFields(
 			"packages",
 			map[string]interface{}{"upgradeable": toUpdatePkg()},
@@ -78,7 +86,7 @@ func toUpdatePkgin() int {
 	return -1
 }
 
-var runPkgListCmd = func() string {
+func refreshPkg() {
 	// This needs elevated privileges
 	stdout, stderr, err := helpers.RunCmd("/usr/bin/ppriv -D -e /bin/pkg refresh")
 
@@ -87,9 +95,11 @@ var runPkgListCmd = func() string {
 		log.Print(stderr)
 		log.Print(err)
 	}
+}
 
+var runPkgListCmd = func() string {
 	// For reasons I can't explain, this command exits 1 if there are no packages to upgrade.
-	stdout, stderr, err = helpers.RunCmd("/bin/pkg list -uH")
+	stdout, stderr, err := helpers.RunCmd("/bin/pkg list -uH")
 
 	if err != nil && stderr != "no packages have newer versions available" {
 		log.Print(err)
