@@ -1,23 +1,40 @@
 package zpool
 
 import (
+	"fmt"
 	"log"
+	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/inputs"
 	"github.com/snltd/illumos-telegraf-plugins/helpers"
 )
 
+const timestampFormat = "Mon Jan 02 15:04:05 2006"
+
 var sampleConfig = `
 	## The metrics you wish to report. They can be any of the headers in the output of 'zpool list',
 	## and also a numeric interpretation of 'health'.
 	# fields = ["size", "alloc", "free", "cap", "dedup", "health"]
+	## Status metrics are things like ongoing resilver time, ongoing scrub time, error counts
+	## and whatnot
+	# status = true
 `
 
 type IllumosZpool struct {
 	Fields []string
+	Status bool
+}
+
+type statusErrorCount struct {
+	device      string
+	state       string
+	readErrors  float64
+	writeErrors float64
+	cksumErrors float64
 }
 
 func (s *IllumosZpool) Description() string {
@@ -30,6 +47,17 @@ func (s *IllumosZpool) SampleConfig() string {
 
 var zpoolOutput = func() string {
 	stdout, stderr, err := helpers.RunCmd("/usr/sbin/zpool list")
+
+	if err != nil {
+		log.Print(stderr)
+		log.Print(err)
+	}
+
+	return stdout
+}
+
+var zpoolStatusOutput = func(pool string) string {
+	stdout, stderr, err := helpers.RunCmd(fmt.Sprintf("/usr/sbin/zpool status -pv %s", pool))
 
 	if err != nil {
 		log.Print(stderr)
@@ -55,6 +83,37 @@ func (s *IllumosZpool) Gather(acc telegraf.Accumulator) error {
 		}
 
 		acc.AddFields("zpool", fields, tags)
+
+		if s.Status {
+			statusOutput := zpoolStatusOutput(poolStats.name)
+
+			statusFields := map[string]interface{}{
+				"resilverTime":   resilverTime(statusOutput),
+				"scrubTime":      scrubTime(statusOutput),
+				"timeSinceScrub": timeSinceScrub(statusOutput),
+			}
+
+			acc.AddFields("zpool.status", statusFields, tags)
+
+			errorCounts := extractErrorCounts(statusOutput)
+
+			for _, errorCount := range errorCounts {
+				errorTags := map[string]string{
+					"pool":   poolStats.name,
+					"device": errorCount.device,
+					"state":  errorCount.state,
+				}
+
+				errorFields := map[string]interface{}{
+					"read":  errorCount.readErrors,
+					"write": errorCount.writeErrors,
+					"cksum": errorCount.cksumErrors,
+				}
+
+				acc.AddFields("zpool.status.errors", errorFields, errorTags)
+			}
+		}
+
 	}
 
 	return nil
@@ -125,6 +184,97 @@ func parseZpool(raw, rawHeader string) Zpool {
 	}
 
 	return pool
+}
+
+// resilverTime pulls the 'Sun Sep 12 15:11:35 2021' format timestamp out of `zpool status`, if
+// it's there, and turns it into the number of seconds from then to now. If there's no resilver in
+// progress, returns 0
+func resilverTime(zpoolStatusOutput string) float64 {
+	return extractTime(zpoolStatusOutput, "resilver in progress since")
+}
+
+func timeSinceScrub(zpoolStatusOutput string) float64 {
+	return extractTime(zpoolStatusOutput, "scrub repaired.*errors on")
+}
+
+func scrubTime(zpoolStatusOutput string) float64 {
+	return extractTime(zpoolStatusOutput, "scrub in progress since")
+}
+
+// separated into a var so it can be overridden by tests
+var timeSince = func(timestamp time.Time) float64 {
+	return time.Since(timestamp).Seconds()
+}
+
+// Timestamps crop up in `zpool status` output. If you supply a string preceding a timestamp,
+// you'll get back the number of seconds since that timestamp. If there is no match, you get 0.
+func extractTime(zpoolStatusOutput, keyPhrase string) float64 {
+	rx := regexp.MustCompile(fmt.Sprintf("(?m)%s ([^\n]+)", keyPhrase))
+
+	startTimeMatches := rx.FindStringSubmatch(zpoolStatusOutput)
+
+	if len(startTimeMatches) == 0 {
+		return 0
+	}
+
+	startTime, err := time.Parse(timestampFormat, startTimeMatches[1])
+
+	if err != nil {
+		return 0
+	}
+
+	return timeSince(startTime)
+}
+
+func extractErrorCounts(statusOutput string) []statusErrorCount {
+	ret := []statusErrorCount{}
+
+	rx := regexp.MustCompile("(?s)config:(.*)errors:")
+
+	blockMatches := rx.FindStringSubmatch(statusOutput)
+
+	if len(blockMatches) == 0 {
+		return ret
+	}
+
+	block := strings.TrimSpace(blockMatches[1])
+	lines := strings.Split(block, "\n")
+
+	for i, line := range lines {
+		if i == 0 {
+			continue
+		}
+
+		fields := strings.Fields(line)
+
+		readErrors, err := strconv.Atoi(fields[2])
+		if err != nil {
+			log.Print("cannot parse zpool status read error counts")
+			continue
+		}
+
+		writeErrors, err := strconv.Atoi(fields[3])
+		if err != nil {
+			log.Print("cannot parse zpool status write error counts")
+			continue
+		}
+
+		cksumErrors, err := strconv.Atoi(fields[4])
+		if err != nil {
+			log.Print("cannot parse zpool status cksum error counts")
+			continue
+		}
+
+		ret = append(ret, statusErrorCount{
+			device:      fields[0],
+			state:       fields[1],
+			readErrors:  float64(readErrors),
+			writeErrors: float64(writeErrors),
+			cksumErrors: float64(cksumErrors),
+		})
+	}
+
+	return ret
 }
 
 func init() {
