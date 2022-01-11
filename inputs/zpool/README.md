@@ -31,6 +31,22 @@ Omitting `Fields` entirely results in all metrics being sent.
     - health (int, a numeric mapping of the pool's health, where 0: ONLINE, 1:
       DEGRADED, 2: SUSPENDED, 3: UNAVAIL, 4: FAULTED, and 99 identifies and
       unknown value
+- zpool.status
+  - tags:
+    - name (the pool name)
+  - fields:
+    - resilverTime (int, number of seconds since resilver began)
+    - scrubTime (int, number of seconds since active scrub began, zero if no
+    scrub is in progress)
+    - timeSinceScrub (int, number of seconds since a scrub completed)
+- zpool.status.errors
+  - tags:
+    - pool (the pool name)
+    - device (short device name)
+  - fields:
+    - cksum (int, count of checksum errors)
+    - read (int, count of read errors)
+    - write (int, count of write errors)
 
 ### Sample Queries
 
