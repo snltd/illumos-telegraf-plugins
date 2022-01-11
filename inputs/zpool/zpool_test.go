@@ -197,6 +197,7 @@ var testMetricsSelectedStatus = []telegraf.Metric{
 		map[string]string{
 			"device": "rpool",
 			"state":  "ONLINE",
+			"pool":   "rpool",
 		},
 		map[string]interface{}{
 			"read":  float64(0),
@@ -210,6 +211,7 @@ var testMetricsSelectedStatus = []telegraf.Metric{
 		map[string]string{
 			"device": "mirror-0",
 			"state":  "ONLINE",
+			"pool":   "rpool",
 		},
 		map[string]interface{}{
 			"read":  float64(0),
@@ -223,6 +225,7 @@ var testMetricsSelectedStatus = []telegraf.Metric{
 		map[string]string{
 			"device": "c2t2d0s1",
 			"state":  "ONLINE",
+			"pool":   "rpool",
 		},
 		map[string]interface{}{
 			"read":  float64(0),
@@ -236,6 +239,7 @@ var testMetricsSelectedStatus = []telegraf.Metric{
 		map[string]string{
 			"device": "c2t3d0s1",
 			"state":  "ONLINE",
+			"pool":   "rpool",
 		},
 		map[string]interface{}{
 			"read":  float64(0),
@@ -315,7 +319,7 @@ func TestScrubTime(t *testing.T) {
 	require.Greater(
 		t,
 		scrubTime(sampleStatusScrubbingOutput),
-		float64(100),
+		float64(1000000),
 	)
 
 	require.Equal(
