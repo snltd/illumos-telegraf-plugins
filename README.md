@@ -39,7 +39,7 @@ All of that said, I've found the plugins reliable and useful.
 This isn't a self-contained software package. It's effectively a big patch to
 Telegraf, and you'll have to do a little work to build it.
 
-First, of course, you need a build environment. I use and OmniOS `lipkg`
+First, of course, you need a build environment. I use an OmniOS `lipkg`
 zone with the following packages.
 
 ```
