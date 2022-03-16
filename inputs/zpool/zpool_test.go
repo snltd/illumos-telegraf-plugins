@@ -1,6 +1,7 @@
 package zpool
 
 import (
+	"errors"
 	"testing"
 	"time"
 
@@ -154,100 +155,129 @@ func TestPluginSinglePoolWithStatus(t *testing.T) {
 		return sampleStatusNormalOutput
 	}
 
-	timeSince = func(timestamp time.Time) float64 {
-		return 10000
-	}
-
 	acc := testutil.Accumulator{}
 	require.NoError(t, s.Gather(&acc))
 
-	testutil.RequireMetricsEqual(
-		t,
-		testMetricsSelectedStatus,
-		acc.GetTelegrafMetrics(),
-		testutil.SortMetrics(),
-		testutil.IgnoreTime())
-}
+	res := acc.GetTelegrafMetrics()
 
-var testMetricsSelectedStatus = []telegraf.Metric{
-	testutil.MustMetric(
-		"zpool",
-		map[string]string{
-			"name": "rpool",
-		},
-		map[string]interface{}{
-			"alloc": float64(6.13106581504e+10),
-		},
-		time.Now(),
-	),
-	testutil.MustMetric(
-		"zpool.status",
-		map[string]string{
-			"name": "rpool",
-		},
-		map[string]interface{}{
-			"resilverTime":   float64(0),
-			"scrubTime":      float64(0),
-			"timeSinceScrub": float64(10000),
-		},
-		time.Now(),
-	),
-	testutil.MustMetric(
-		"zpool.status.errors",
-		map[string]string{
-			"device": "rpool",
-			"state":  "ONLINE",
-			"pool":   "rpool",
-		},
-		map[string]interface{}{
-			"read":  float64(0),
-			"write": float64(0),
-			"cksum": float64(0),
-		},
-		time.Now(),
-	),
-	testutil.MustMetric(
-		"zpool.status.errors",
-		map[string]string{
-			"device": "mirror-0",
-			"state":  "ONLINE",
-			"pool":   "rpool",
-		},
-		map[string]interface{}{
-			"read":  float64(0),
-			"write": float64(0),
-			"cksum": float64(0),
-		},
-		time.Now(),
-	),
-	testutil.MustMetric(
-		"zpool.status.errors",
-		map[string]string{
-			"device": "c2t2d0s1",
-			"state":  "ONLINE",
-			"pool":   "rpool",
-		},
-		map[string]interface{}{
-			"read":  float64(0),
-			"write": float64(0),
-			"cksum": float64(0),
-		},
-		time.Now(),
-	),
-	testutil.MustMetric(
-		"zpool.status.errors",
-		map[string]string{
-			"device": "c2t3d0s1",
-			"state":  "ONLINE",
-			"pool":   "rpool",
-		},
-		map[string]interface{}{
-			"read":  float64(0),
-			"write": float64(0),
-			"cksum": float64(0),
-		},
-		time.Now(),
-	),
+	testutil.RequireMetricEqual(
+		t,
+		res[0],
+		testutil.MustMetric(
+			"zpool",
+			map[string]string{
+				"name": "rpool",
+			},
+			map[string]interface{}{
+				"alloc": float64(6.13106581504e+10),
+			},
+			time.Now(),
+		),
+		testutil.IgnoreTime(),
+	)
+
+	timeMetric := res[1]
+
+	require.Equal(t, "zpool.status", timeMetric.Name())
+	require.Equal(t, map[string]string{"name": "rpool"}, timeMetric.Tags())
+	require.Equal(t, map[string]string{"name": "rpool"}, timeMetric.Tags())
+	fields := timeMetric.FieldList()
+
+	v, err := valForField(t, fields, "resilverTime")
+	require.NoError(t, err)
+	require.Equal(t, float64(0), v)
+
+	v, err = valForField(t, fields, "scrubTime")
+	require.NoError(t, err)
+	require.Equal(t, float64(0), v)
+
+	v, err = valForField(t, fields, "scrubTime")
+	require.NoError(t, err)
+	require.Equal(t, float64(0), v)
+
+	v, err = valForField(t, fields, "timeSinceScrub")
+	require.NoError(t, err)
+	require.Greater(t, v, float64(3e7))
+
+	testutil.RequireMetricEqual(
+		t,
+		res[2],
+		testutil.MustMetric(
+			"zpool.status.errors",
+			map[string]string{
+				"device": "rpool",
+				"state":  "ONLINE",
+				"pool":   "rpool",
+			},
+			map[string]interface{}{
+				"read":  float64(0),
+				"write": float64(0),
+				"cksum": float64(0),
+			},
+			time.Now(),
+		),
+		testutil.IgnoreTime(),
+	)
+
+	testutil.RequireMetricEqual(
+		t,
+		res[3],
+		testutil.MustMetric(
+			"zpool.status.errors",
+			map[string]string{
+				"device": "mirror-0",
+				"state":  "ONLINE",
+				"pool":   "rpool",
+			},
+			map[string]interface{}{
+				"read":  float64(0),
+				"write": float64(0),
+				"cksum": float64(0),
+			},
+			time.Now(),
+		),
+		testutil.IgnoreTime(),
+	)
+
+	testutil.RequireMetricEqual(
+		t,
+		res[4],
+		testutil.MustMetric(
+			"zpool.status.errors",
+			map[string]string{
+				"device": "c2t2d0s1",
+				"state":  "ONLINE",
+				"pool":   "rpool",
+			},
+			map[string]interface{}{
+				"read":  float64(0),
+				"write": float64(0),
+				"cksum": float64(0),
+			},
+			time.Now(),
+		),
+		testutil.IgnoreTime(),
+	)
+
+	testutil.RequireMetricEqual(
+		t,
+		res[5],
+		testutil.MustMetric(
+			"zpool.status.errors",
+			map[string]string{
+				"device": "c2t3d0s1",
+				"state":  "ONLINE",
+				"pool":   "rpool",
+			},
+			map[string]interface{}{
+				"read":  float64(0),
+				"write": float64(0),
+				"cksum": float64(0),
+			},
+			time.Now(),
+		),
+		testutil.IgnoreTime(),
+	)
 }
 
 // Function tests
@@ -338,11 +368,29 @@ func TestTimeSinceScrub(t *testing.T) {
 		float64(6000),
 	)
 
+	require.Greater(
+		t,
+		timeSinceScrub(sampleStatusNormalOutput2),
+		float64(6000),
+	)
+
 	require.Equal(
 		t,
 		float64(0),
 		timeSinceScrub(sampleStatusUnscrubbedOutput),
 	)
+}
+
+func valForField(t *testing.T, values []*telegraf.Field, key string) (float64, error) {
+	t.Helper()
+
+	for _, r := range values {
+		if r.Key == key {
+			return r.Value.(float64), nil
+		}
+	}
+
+	return 0, errors.New("did not find field")
 }
 
 var header = "NAME    SIZE  ALLOC   FREE  CKPOINT  EXPANDSZ   FRAG    CAP  DEDUP  HEALTH  ALTROOT"
@@ -374,6 +422,20 @@ errors: No known data errors
 var sampleStatusNormalOutput = `    pool: rpool
  state: ONLINE
   scan: scrub repaired 0 in 0 days 00:03:10 with 0 errors on Fri Feb 19 17:09:54 2021
+config:
+
+        NAME          STATE     READ WRITE CKSUM
+        rpool         ONLINE       0     0     0
+          mirror-0    ONLINE       0     0     0
+            c2t2d0s1  ONLINE       0     0     0
+            c2t3d0s1  ONLINE       0     0     0
+
+errors: No known data errors
+`
+
+var sampleStatusNormalOutput2 = `  pool: rpool
+ state: ONLINE
+  scan: scrub repaired 0 in 0 days 00:03:12 with 0 errors on Wed Mar  9 10:06:31 2022
 config:
 
         NAME          STATE     READ WRITE CKSUM

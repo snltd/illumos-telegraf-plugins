@@ -13,7 +13,7 @@ import (
 	"github.com/snltd/illumos-telegraf-plugins/helpers"
 )
 
-const timestampFormat = "Mon Jan 02 15:04:05 2006"
+const timestampFormat = "Mon Jan 2 15:04:05 2006"
 
 var sampleConfig = `
 	## The metrics you wish to report. They can be any of the headers in the output of 'zpool list',
@@ -201,11 +201,6 @@ func scrubTime(zpoolStatusOutput string) float64 {
 	return extractTime(zpoolStatusOutput, "scrub in progress since")
 }
 
-// separated into a var so it can be overridden by tests
-var timeSince = func(timestamp time.Time) float64 {
-	return time.Since(timestamp).Seconds()
-}
-
 // Timestamps crop up in `zpool status` output. If you supply a string preceding a timestamp,
 // you'll get back the number of seconds since that timestamp. If there is no match, you get 0.
 func extractTime(zpoolStatusOutput, keyPhrase string) float64 {
@@ -223,7 +218,7 @@ func extractTime(zpoolStatusOutput, keyPhrase string) float64 {
 		return 0
 	}
 
-	return timeSince(startTime)
+	return time.Since(startTime).Seconds()
 }
 
 func extractErrorCounts(statusOutput string) []statusErrorCount {
