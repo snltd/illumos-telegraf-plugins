@@ -93,7 +93,13 @@ page](https://github.com/snltd/illumos-telegraf-plugins/releases). Don't
 forget the `v`! For example:
 
 ```
-github.com/snltd/illumos-telegraf-plugins v0.2.0
+github.com/snltd/illumos-telegraf-plugins v0.5.0
+```
+
+And
+
+```
+$ go mod tidy
 ```
 
 Now you can build Telegraf.
