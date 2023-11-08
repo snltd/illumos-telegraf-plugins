@@ -53,7 +53,7 @@ func (s *IllumosSmf) SampleConfig() string {
 }
 
 var rawSvcsOutput = func() string {
-	stdout, stderr, err := helpers.RunCmd(svcsCmd)
+	stdout, stderr, err := helpers.RunCmdPfexec(svcsCmd)
 
 	if err != nil {
 		log.Print(stderr)
