@@ -1,6 +1,7 @@
 package diskhealth
 
 import (
+	"errors"
 	"log"
 	"strings"
 
@@ -43,12 +44,26 @@ func parseNamedStats(s *IllumosDiskHealth, stats []*kstat.Named) (map[string]int
 
 	for _, stat := range stats {
 		switch {
+		case stat.Name == "":
+			continue
 		case helpers.WeWant(stat.Name, s.Fields):
-			fields[camelCase(stat.Name)] = helpers.NamedValue(stat).(float64)
+			fieldName, err := camelCase(stat.Name)
+
+			if err != nil {
+				log.Printf("missing field for %v", stats)
+			} else {
+				fields[fieldName] = helpers.NamedValue(stat).(float64)
+			}
 		case stat.Name == "Size" && helpers.WeWant("Size", s.Tags):
 			tags["size"] = helpers.UnBytify(helpers.NamedValue(stat).(float64))
 		case helpers.WeWant(stat.Name, s.Tags):
-			tags[camelCase(stat.Name)] = strings.TrimSpace(stat.StringVal)
+			tagName, err := camelCase(stat.Name)
+
+			if err != nil {
+				log.Printf("missing field '%s' in %v", stat.Name, stats)
+			} else {
+				tags[tagName] = strings.TrimSpace(stat.StringVal)
+			}
 		}
 	}
 
@@ -84,11 +99,16 @@ func (s *IllumosDiskHealth) Gather(acc telegraf.Accumulator) error {
 	return nil
 }
 
-func camelCase(str string) string {
+func camelCase(str string) (string, error) {
 	words := strings.Fields(strings.Title(strings.ToLower(str)))
+
+	if len(words) == 0 {
+		return "", errors.New("no words")
+	}
+
 	words[0] = strings.ToLower(words[0])
 
-	return strings.Join(words, "")
+	return strings.Join(words, ""), nil
 }
 
 func init() {

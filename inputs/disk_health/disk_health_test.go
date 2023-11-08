@@ -10,10 +10,53 @@ import (
 
 func TestCamelCase(t *testing.T) {
 	t.Parallel()
-	require.Equal(t, "softErrors", camelCase("Soft Errors"))
-	require.Equal(t, "softErrors", camelCase("soft Errors"))
-	require.Equal(t, "word", camelCase("word"))
-	require.Equal(t, "oneTwoThree", camelCase("One tWo three"))
+  actual, err := camelCase("Soft Errors")
+  require.NoError(t, err)
+	require.Equal(t, "softErrors", actual)
+
+  actual, err = camelCase("word")
+  require.NoError(t, err)
+	require.Equal(t, "word", actual)
+
+  actual, err = camelCase("One tWO three")
+  require.NoError(t, err)
+	require.Equal(t, "oneTwoThree", actual)
+
+  actual, err = camelCase("")
+  require.Error(t, err)
+}
+
+func TestParseNamedStatsBlkDev(t *testing.T) {
+	t.Parallel()
+
+	s := &IllumosDiskHealth{
+		Devices: []string{"sd6"},
+		Fields:  []string{"Hard Errors", "Soft Errors", "Transport Errors", "Illegal Request"},
+		Tags:    []string{"Vendor", "Serial No", "Product", "Revision"},
+	}
+
+	testData := helpers.FromFixture("blkdeverr--0--blkdev0,err.kstat")
+	fields, tags := parseNamedStats(s, testData)
+
+	require.Equal(
+		t,
+		fields,
+		map[string]interface{}{
+			"hardErrors":      float64(0),
+			"illegalRequest":  float64(0),
+			"softErrors":      float64(0),
+			"transportErrors": float64(0),
+		},
+	)
+
+	require.Equal(
+		t,
+		tags,
+		map[string]string{
+			"revision": "P9CR30A",
+			"serialNo": "2301E699B2E7",
+		},
+	)
 }
 
 func TestParseNamedStats(t *testing.T) {
