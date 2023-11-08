@@ -126,7 +126,7 @@ useful. Can report per-zone CPU usage if running in the global.
 ### disk_health
 Uses the `device_error` kstats to keep track of disk errors. Tries its best to
 tag the metrics with information about the disks like vendor, serial number
-etc.
+etc. All points relate to an error, so if there are no errors, you get no points.
 
 ### fma
 A very experimental plugin which parses the output of `fmadm(1m)` and
