@@ -20,7 +20,7 @@ Plugin minimum tested version: 1.18
 
 If it is running in the global zone, this plugin is able to collect SMF
 information for all NGZs. However, the user running Telegraf must have the
-`file_dac_search` privilege. `pfexec(1)` is used to gather information.
+`file_dac_search` `proc_owner` privileges. `pfexec(1)` is used to gather information.
 
 This plugin does not work on Solaris.
 
