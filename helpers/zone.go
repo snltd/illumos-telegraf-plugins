@@ -140,9 +140,11 @@ func ParseZoneVnics(raw string) ZoneVnicMap {
 	rawVnics := strings.Split(raw, "\n")
 	ret := ZoneVnicMap{}
 
-	for _, rawVnic := range rawVnics {
-		vnic := parseZoneVnic(rawVnic)
-		ret[vnic.Name] = vnic
+	if raw != "" {
+		for _, rawVnic := range rawVnics {
+			vnic := parseZoneVnic(rawVnic)
+			ret[vnic.Name] = vnic
+		}
 	}
 
 	return ret

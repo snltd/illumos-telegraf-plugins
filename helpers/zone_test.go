@@ -134,6 +134,12 @@ func TestParseZoneVnics(t *testing.T) {
 		},
 		ParseZoneVnics("www_records0:cube-www-records:rge0:1000"),
 	)
+
+	require.Equal(
+		t,
+		ZoneVnicMap{},
+		ParseZoneVnics(""),
+	)
 }
 
 func TestParseZoneVnic(t *testing.T) {
