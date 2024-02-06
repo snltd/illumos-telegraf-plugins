@@ -1,0 +1,10 @@
+NAME="OmniOS"
+PRETTY_NAME="OmniOS Community Edition v11 r151048f"
+CPE_NAME="cpe:/o:omniosce:omnios:11:151048:6"
+ID=omnios
+VERSION=r151048f
+VERSION_ID=r151048f
+BUILD_ID=151048.6.2023.12.10
+HOME_URL="https://omnios.org/"
+SUPPORT_URL="https://omnios.org/"
+BUG_REPORT_URL="https://github.com/omniosorg/omnios-build/issues/new"
