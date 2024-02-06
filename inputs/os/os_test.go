@@ -31,6 +31,10 @@ func TestPlugin(t *testing.T) {
 	t.Parallel()
 
 	osRelease = "testdata/os-release"
+	runUnameCmd = func() string {
+		return "omnios-r151048-12345678"
+	}
+
 	s := &IllumosOS{}
 	acc := testutil.Accumulator{}
 	require.NoError(t, s.Gather(&acc))
@@ -51,6 +55,7 @@ var testMetrics = []telegraf.Metric{
 			"name":     "OmniOS",
 			"build_id": "151048.6.2023.12.10",
 			"version":  "r151048f",
+			"kernel":   "omnios-r151048-12345678",
 		},
 		map[string]interface{}{
 			"release": 1,

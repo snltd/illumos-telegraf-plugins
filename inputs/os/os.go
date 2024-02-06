@@ -5,12 +5,14 @@ Inspired by, that is "ripped off from" the node_exporter 'os' output.
 */
 
 import (
+	"log"
 	"os"
 	"slices"
 	"strings"
 
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/snltd/illumos-telegraf-plugins/helpers"
 )
 
 var sampleConfig = `
@@ -29,7 +31,18 @@ func (s *IllumosOS) SampleConfig() string {
 
 type IllumosOS struct{}
 
-func gatherOsRelease(acc telegraf.Accumulator) error {
+var runUnameCmd = func() string {
+	stdout, stderr, err := helpers.RunCmdPfexec("/bin/uname -v")
+
+	if err != nil {
+		log.Print(stderr)
+		log.Print(err)
+	}
+
+	return stdout
+}
+
+func (s *IllumosOS) Gather(acc telegraf.Accumulator) error {
 	osReleaseContents, err := os.ReadFile(osRelease)
 
 	if err != nil {
@@ -37,6 +50,8 @@ func gatherOsRelease(acc telegraf.Accumulator) error {
 	}
 
 	tags := parseOsRelease(string(osReleaseContents))
+	tags["kernel"] = runUnameCmd()
+
 	acc.AddFields("os", map[string]interface{}{"release": 1}, tags)
 
 	return nil
@@ -61,16 +76,6 @@ func parseOsRelease(osRelease string) map[string]string {
 	}
 
 	return ret
-}
-
-func (s *IllumosOS) Gather(acc telegraf.Accumulator) error {
-	err := gatherOsRelease(acc)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func init() {
