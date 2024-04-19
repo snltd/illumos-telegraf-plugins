@@ -34,15 +34,18 @@ func TestPlugin(t *testing.T) {
 	t.Parallel()
 
 	s := &IllumosMemory{
-		SwapOn:         true,
-		SwapFields:     []string{"allocated", "reserved", "used", "available"},
-		ExtraOn:        true,
-		ExtraFields:    []string{"kernel", "arcsize", "freelist"},
-		VminfoOn:       true,
-		VminfoFields:   []string{"swap_alloc", "swap_avail", "swap_free", "swap_resv"},
-		CpuvmOn:        true,
-		CpuvmFields:    []string{"pgin", "anonpgin", "pgout", "anonpgout"},
-		CpuvmAggregate: false,
+		SwapOn:           true,
+		SwapFields:       []string{"allocated", "reserved", "used", "available"},
+		ExtraOn:          true,
+		ExtraFields:      []string{"kernel", "arcsize", "freelist"},
+		VminfoOn:         true,
+		VminfoFields:     []string{"swap_alloc", "swap_avail", "swap_free", "swap_resv"},
+		CpuvmOn:          true,
+		CpuvmFields:      []string{"pgin", "anonpgin", "pgout", "anonpgout"},
+		CpuvmAggregate:   false,
+		ZoneMemcapOn:     true,
+		ZoneMemcapZones:  []string{"serv-wf"},
+		ZoneMemcapFields: []string{"physcap", "rss", "swap"},
 	}
 
 	acc := testutil.Accumulator{}
@@ -89,6 +92,8 @@ func TestPlugin(t *testing.T) {
 
 	_, present := cpuvmMetric.GetField("vm.aggregate.pgin")
 	require.False(t, present)
+
+	// zone memcap metrics
 }
 
 func TestPluginAggregates(t *testing.T) {
@@ -117,6 +122,47 @@ func TestPluginAggregates(t *testing.T) {
 		_, present := cpuvmMetric.GetField(fieldName)
 		require.True(t, present)
 	}
+}
+
+func TestParseZoneMemcapStats(t *testing.T) {
+	t.Parallel()
+
+	s := &IllumosMemory{
+		ZoneMemcapOn:     true,
+		ZoneMemcapZones:  []string{"serv-wf"},
+		ZoneMemcapFields: []string{"physcap", "rss", "swap"},
+	}
+
+	testData := helpers.FromFixture("memory_cap--7--serv-wf.kstat")
+	fields, tags := parseZoneMemcapStats(s, testData)
+
+	require.Equal(
+		t,
+		fields,
+		map[string]interface{}{
+			"physcap": float64(1.759218604032e+13),
+			"rss":     float64(3.88493312e+08),
+			"swap":    float64(4.54160384e+08),
+		},
+	)
+
+	require.Equal(
+		t,
+		tags,
+		map[string]string{
+			"zone": "serv-wf",
+		},
+	)
+
+	s = &IllumosMemory{
+		ZoneMemcapOn:     true,
+		ZoneMemcapZones:  []string{"serv-build"},
+		ZoneMemcapFields: []string{"physcap", "rss", "swap"},
+	}
+
+	fields, tags = parseZoneMemcapStats(s, testData)
+	require.Empty(t, fields)
+	require.Empty(t, tags)
 }
 
 func TestParseNamedStats(t *testing.T) {

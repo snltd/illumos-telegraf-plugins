@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	// "strings"
 
 	"github.com/illumos/go-kstat"
 	"github.com/influxdata/telegraf"
@@ -28,6 +29,10 @@ var sampleConfig = `
 	# cpuvm_fields = ["pgin", "anonpgin", "pgpgin", "pgout", "anonpgout", "pgpgout"]
 	## Whether to aggregate cpuvm fields. (False sents a set of metrics for each vcpu)
 	# cpuvm_aggregate = false
+  ## Whether to collect zone memory_cap fields, and which ones
+	# zone_memcap_on = true
+	# zones = []
+	# zone_memcap_fields = ["physcap", "rss", "swap"]
 `
 
 var pageSize float64
@@ -41,15 +46,18 @@ func (s *IllumosMemory) SampleConfig() string {
 }
 
 type IllumosMemory struct {
-	SwapOn         bool
-	SwapFields     []string
-	ExtraOn        bool
-	ExtraFields    []string
-	VminfoOn       bool
-	VminfoFields   []string
-	CpuvmOn        bool
-	CpuvmFields    []string
-	CpuvmAggregate bool
+	SwapOn           bool
+	SwapFields       []string
+	ExtraOn          bool
+	ExtraFields      []string
+	VminfoOn         bool
+	VminfoFields     []string
+	CpuvmOn          bool
+	CpuvmFields      []string
+	CpuvmAggregate   bool
+	ZoneMemcapOn     bool
+	ZoneMemcapZones  []string
+	ZoneMemcapFields []string
 }
 
 func (s *IllumosMemory) Gather(acc telegraf.Accumulator) error {
@@ -77,6 +85,44 @@ func (s *IllumosMemory) Gather(acc telegraf.Accumulator) error {
 
 	if s.CpuvmOn {
 		acc.AddFields("memory.cpuVm", cpuvmKStats(s, token), tags)
+	}
+
+	if s.ZoneMemcapOn {
+		gatherZoneMemcapStats(s, acc, token)
+	}
+
+	return nil
+}
+
+func parseZoneMemcapStats(s *IllumosMemory, stats []*kstat.Named) (map[string]interface{}, map[string]string) {
+	fields := make(map[string]interface{})
+	tags := make(map[string]string)
+
+	for _, stat := range stats {
+		if !helpers.WeWant(stat.Name, s.ZoneMemcapFields) || !helpers.WeWant(stat.KStat.Name, s.ZoneMemcapZones) {
+			continue
+		}
+
+		tags["zone"] = stat.KStat.Name
+		fields[stat.Name] = helpers.NamedValue(stat).(float64)
+	}
+
+	return fields, tags
+}
+
+func gatherZoneMemcapStats(s *IllumosMemory, acc telegraf.Accumulator, token *kstat.Token) error {
+	memcapStats := helpers.KStatsInModule(token, "zone_memcap")
+
+	for _, stat := range memcapStats {
+		namedStats, err := stat.AllNamed()
+
+		if err != nil {
+			log.Printf("cannot get named zone_memcap stats for %s\n", stat.Name)
+			return err
+		}
+
+		fields, tags := parseZoneMemcapStats(s, namedStats)
+		acc.AddFields("memory.zone", fields, tags)
 	}
 
 	return nil
