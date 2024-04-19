@@ -93,7 +93,7 @@ func TestPlugin(t *testing.T) {
 	_, present := cpuvmMetric.GetField("vm.aggregate.pgin")
 	require.False(t, present)
 
-	// zone memcap metrics
+	// zone memcap metrics can't be tested because my build zone doesn't have them
 }
 
 func TestPluginAggregates(t *testing.T) {

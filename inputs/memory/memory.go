@@ -31,7 +31,7 @@ var sampleConfig = `
 	# cpuvm_aggregate = false
   ## Whether to collect zone memory_cap fields, and which ones
 	# zone_memcap_on = true
-	# zones = []
+	# zone_memcap_zones = []
 	# zone_memcap_fields = ["physcap", "rss", "swap"]
 `
 
@@ -111,7 +111,7 @@ func parseZoneMemcapStats(s *IllumosMemory, stats []*kstat.Named) (map[string]in
 }
 
 func gatherZoneMemcapStats(s *IllumosMemory, acc telegraf.Accumulator, token *kstat.Token) error {
-	memcapStats := helpers.KStatsInModule(token, "zone_memcap")
+	memcapStats := helpers.KStatsInModule(token, "memory_cap")
 
 	for _, stat := range memcapStats {
 		namedStats, err := stat.AllNamed()
