@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"regexp"
-	// "strings"
 
 	"github.com/illumos/go-kstat"
 	"github.com/influxdata/telegraf"
