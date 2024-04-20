@@ -1,6 +1,6 @@
-# Illumos Telegraf Plugins
+# illumos Telegraf Plugins
 
-This is a collection of Illumos-specific
+This is a collection of illumos-specific
 [Telegraf](https://github.com/influxdata/telegraf) input plugins which I wrote
 because I needed them.
 
@@ -23,13 +23,13 @@ Things to note.
   some (e.g. SMF) won't. Suck it and see. I'd be delighted to receive  PRs if
   anyone modifies the code to work right across SunOS.
 * I have no interest in getting any of these plugins merged with the official
-  Telegraf distribution. Illumos is a serious minority interest these days,
+  Telegraf distribution. illumos is a serious minority interest these days,
   and I can't imagine the Telegraf people have any desire to be encumbered
   with support for it. There are also difficulties in testing and
   cross-compilation, because the KStats module uses CGo. If someone wants to
   chase this, make a fork, or in any way improve the end-user experience, help
   yourself.
-* You can only run the tests on an Illumos box. Properly mocking all the KStat
+* You can only run the tests on an illumos box. Properly mocking all the KStat
   calls wasn't something I wanted to get involved in.
 
 All of that said, I've found the plugins reliable and useful.
@@ -82,7 +82,7 @@ _ "github.com/snltd/illumos-telegraf-plugins/inputs/zones"
 _ "github.com/snltd/illumos-telegraf-plugins/inputs/zpool"
 ```
 
-Certain linux-centric plugins will break a Telegraf build on Illumos.  To
+Certain linux-centric plugins will break a Telegraf build on illumos.  To
 build 1.16.3 on my system I had to remove the `modbus`, `ecs`, and `docker`
 inputs, but normally I take out way more than that. I pretty much only leave
 in the things I actually need.
