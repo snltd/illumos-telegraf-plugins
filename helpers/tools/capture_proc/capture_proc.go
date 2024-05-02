@@ -9,10 +9,11 @@ import (
 	"encoding/gob"
 	"fmt"
 	"os"
+	"path"
 )
 
-func getPsinfo(pid string) psinfoT {
-	var psinfo psinfoT
+func getPsinfo(pid string) psinfo_t {
+	var psinfo psinfo_t
 
 	file := fmt.Sprintf("/proc/%s/psinfo", pid)
 	fh, err := os.Open(file)
@@ -32,10 +33,10 @@ func getPsinfo(pid string) psinfoT {
 	return psinfo
 }
 
-func getUsage(pid string) prusageT {
+func getUsage(pid string) prusage_t {
 	file := fmt.Sprintf("/proc/%s/usage", pid)
 
-	var prusage prusageT
+	var prusage prusage_t
 
 	fh, err := os.Open(file)
 
@@ -61,7 +62,14 @@ func main() {
 	}
 
 	for _, pid := range os.Args[1:] {
-		psinfoFile := fmt.Sprintf("%s.psinfo", pid)
+		psinfoDir := fmt.Sprintf("%s", pid)
+
+		if err := os.Mkdir(psinfoDir, os.ModePerm); err != nil {
+			fmt.Fprintf(os.Stderr, "Could not create directory: %s", err)
+			os.Exit(2)
+		}
+
+		psinfoFile := path.Join(psinfoDir, "psinfo")
 
 		var psinfoBuf bytes.Buffer
 
@@ -83,7 +91,7 @@ func main() {
 
 		var usageBuf bytes.Buffer
 
-		usageFile := fmt.Sprintf("%s.usage", pid)
+		usageFile := path.Join(psinfoDir, "usage")
 		usage := getUsage(pid)
 		enc = gob.NewEncoder(&usageBuf)
 		err = enc.Encode(usage)

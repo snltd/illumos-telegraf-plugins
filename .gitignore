@@ -8,3 +8,4 @@
 vendor/
 *.swp
 capture_kstat
+capture_proc
