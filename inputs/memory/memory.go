@@ -87,7 +87,10 @@ func (s *IllumosMemory) Gather(acc telegraf.Accumulator) error {
 	}
 
 	if s.ZoneMemcapOn {
-		gatherZoneMemcapStats(s, acc, token)
+		err := gatherZoneMemcapStats(s, acc, token)
+		if err != nil {
+			log.Println(err)
+		}
 	}
 
 	return nil

@@ -70,10 +70,7 @@ type procObjectValues map[string]interface{}
 type procObjectTags map[string]string
 type procObjectMap map[int]procObject
 
-var (
-	makeZoneMap = helpers.NewZoneMap
-	procRootDir = "/proc"
-)
+var procRootDir = "/proc"
 
 func toNs(ts timestruc_t) int64 {
 	return ts[0]*1e9 + ts[1]
@@ -243,7 +240,7 @@ func allProcs() []fs.DirEntry {
 	procs, err := os.ReadDir(procRootDir)
 
 	if err != nil {
-		log.Fatal(fmt.Sprintf("cannot read %s", procRootDir))
+		log.Fatalf("cannot read %s", procRootDir)
 	}
 
 	return procs

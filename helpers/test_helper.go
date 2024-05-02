@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/illumos/go-kstat"
+	kstat "github.com/illumos/go-kstat"
 )
 
 // FromFixture loads serialized kstat data off disk and returns the real data. The filename is
@@ -19,7 +19,7 @@ func FromFixture(filename string) []*kstat.Named {
 	raw, err := os.Open(filename)
 
 	if err != nil {
-		log.Fatal(fmt.Sprintf("Could not load serialized data from disk: %v\n", err))
+		log.Fatalf("Could not load serialized data from disk: %v\n", err)
 	}
 
 	dec := gob.NewDecoder(raw)

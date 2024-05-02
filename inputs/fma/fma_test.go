@@ -1,7 +1,7 @@
 package fma
 
 import (
-	"io/ioutil"
+	"os"
 	"testing"
 	"time"
 
@@ -88,13 +88,13 @@ func TestPlugin(t *testing.T) {
 	}
 
 	runFmadmFaultyCmd = func() string {
-		ret, _ := ioutil.ReadFile("testdata/fmadm_output.txt")
+		ret, _ := os.ReadFile("testdata/fmadm_output.txt")
 
 		return string(ret)
 	}
 
 	runFmstatCmd = func() string {
-		ret, _ := ioutil.ReadFile("testdata/fmstat_output.txt")
+		ret, _ := os.ReadFile("testdata/fmstat_output.txt")
 
 		return string(ret)
 	}

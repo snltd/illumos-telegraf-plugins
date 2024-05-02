@@ -100,10 +100,14 @@ func (s *IllumosDiskHealth) Gather(acc telegraf.Accumulator) error {
 }
 
 func camelCase(str string) (string, error) {
-	words := strings.Fields(strings.Title(strings.ToLower(str)))
+	words := strings.Fields(strings.ToLower(str))
 
 	if len(words) == 0 {
 		return "", errors.New("no words")
+	}
+
+	for i, word := range words {
+		words[i] = strings.ToUpper(word[:1]) + word[1:]
 	}
 
 	words[0] = strings.ToLower(words[0])
