@@ -159,4 +159,6 @@ func TestParseZoneVnic(t *testing.T) {
 
 var zoneadmOutput = `0:global:running:/::ipkg:shared:0
 42:cube-media:running:/zones/cube-media:c624d04f-d0d9-e1e6-822e-acebc78ec9ff:lipkg:excl:128
-44:cube-ws:installed:/zones/cube-ws:0f9c56f4-9810-6d45-f801-d34bf27cc13f:pkgsrc:excl:179`
+44:cube-ws:installed:/zones/cube-ws:0f9c56f4-9810-6d45-f801-d34bf27cc13f:pkgsrc:excl:179
+-:gold-lipkg-b:installed:/zones/gold-lipkg-b:4e9ce283-b99b-47a4-b8f1-dfc09b3cfd99:lipkg:excl:219
+`

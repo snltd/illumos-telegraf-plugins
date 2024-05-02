@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"strconv"
@@ -39,6 +40,11 @@ func NewZoneMap() ZoneMap {
 	}
 
 	return ParseZones(stdout)
+}
+
+// Used to generate test fixtures
+func NewZoneMapFromText(raw string) ZoneMap {
+	return ParseZones(raw)
 }
 
 func NewZoneVnicMap() ZoneVnicMap {
@@ -119,6 +125,10 @@ func parseZone(raw string) (Zone, error) {
 
 	if len(chunks) != 8 {
 		return Zone{}, fmt.Errorf("found %d fields", len(chunks))
+	}
+
+	if chunks[0] == "-" {
+		return Zone{}, errors.New("zone not running")
 	}
 
 	zoneID, _ := strconv.Atoi(chunks[0])
