@@ -194,6 +194,14 @@ func newProcObject(s *IllumosProcess, pid int) (procObject, error) {
 		tags["contract"] = fmt.Sprint(psinfo.Pr_contract)
 	}
 
+	if helpers.WeWant("pid", s.Tags) {
+		tags["pid"] = fmt.Sprint(psinfo.Pr_pid)
+	}
+
+	if helpers.WeWant("ppid", s.Tags) {
+		tags["ppid"] = fmt.Sprint(psinfo.Pr_ppid)
+	}
+
 	return procObject{Values: values, Tags: tags}, nil
 }
 

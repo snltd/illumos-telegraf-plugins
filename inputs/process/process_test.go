@@ -237,6 +237,8 @@ func TestNewProcObjectNoFilters(t *testing.T) {
 			"projid":   "0",
 			"zoneid":   "6",
 			"contract": "845",
+			"pid":      "8055",
+			"ppid":     "4231",
 		},
 		result.Tags,
 	)
