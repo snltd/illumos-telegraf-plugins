@@ -400,7 +400,7 @@ func psinfoFromFixture(pid int) psinfo_t {
 	raw, err := os.Open(filename)
 
 	if err != nil {
-		log.Fatal(fmt.Sprintf("Could not load serialized data from disk: %v\n", err))
+		log.Fatalf("Could not load serialized data from disk: %v\n", err)
 	}
 
 	dec := gob.NewDecoder(raw)
@@ -421,7 +421,7 @@ func usageFromFixture(pid int) prusage_t {
 	raw, err := os.Open(filename)
 
 	if err != nil {
-		log.Fatal(fmt.Sprintf("Could not load serialized data from disk: %v\n", err))
+		log.Fatalf("Could not load serialized data from disk: %v\n", err)
 	}
 
 	dec := gob.NewDecoder(raw)

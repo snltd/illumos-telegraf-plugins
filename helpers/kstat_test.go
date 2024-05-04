@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/illumos/go-kstat"
+	kstat "github.com/illumos/go-kstat"
 	"github.com/stretchr/testify/require"
 )
 
@@ -58,7 +58,7 @@ func allKStatsFromFixtures() []*kstat.KStat {
 
 	raw, err := os.Open("testdata/all.kstat")
 	if err != nil {
-		log.Fatal(fmt.Sprintf("Could not load serialized data from disk: %v\n", err))
+		log.Fatalf("Could not load serialized data from disk: %v\n", err)
 	}
 
 	dec := gob.NewDecoder(raw)

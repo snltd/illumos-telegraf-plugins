@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"encoding/gob"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
@@ -62,7 +61,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = ioutil.WriteFile(file, buf.Bytes(), 0o644) //nolint
+	err = os.WriteFile(file, buf.Bytes(), 0o644) //nolint
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Could not write serialized data to disk: %v\n", err)

@@ -2,9 +2,8 @@ package helpers
 
 import (
 	"fmt"
+	kstat "github.com/illumos/go-kstat"
 	"log"
-
-	"github.com/illumos/go-kstat"
 )
 
 // pulled out into a function to facilitate testing.
@@ -23,7 +22,7 @@ func NamedValue(stat *kstat.Named) interface{} {
 	case "uint32", "uint64":
 		return float64(stat.UintVal)
 	default:
-		log.Fatal(fmt.Sprintf("%s is of type %s", stat.Name, stat.Type))
+		log.Fatalf("%s is of type %s", stat.Name, stat.Type)
 	}
 
 	return nil

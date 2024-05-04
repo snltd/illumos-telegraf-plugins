@@ -10,20 +10,21 @@ import (
 
 func TestCamelCase(t *testing.T) {
 	t.Parallel()
-  actual, err := camelCase("Soft Errors")
-  require.NoError(t, err)
+	actual, err := camelCase("Soft Errors")
+	require.NoError(t, err)
 	require.Equal(t, "softErrors", actual)
 
-  actual, err = camelCase("word")
-  require.NoError(t, err)
+	actual, err = camelCase("word")
+	require.NoError(t, err)
 	require.Equal(t, "word", actual)
 
-  actual, err = camelCase("One tWO three")
-  require.NoError(t, err)
+	actual, err = camelCase("One tWO three")
+	require.NoError(t, err)
 	require.Equal(t, "oneTwoThree", actual)
 
-  actual, err = camelCase("")
-  require.Error(t, err)
+	actual, err = camelCase("")
+	require.Equal(t, "", actual)
+	require.Error(t, err)
 }
 
 func TestParseNamedStatsBlkDev(t *testing.T) {

@@ -62,7 +62,7 @@ func main() {
 	}
 
 	for _, pid := range os.Args[1:] {
-		psinfoDir := fmt.Sprintf("%s", pid)
+		psinfoDir := pid
 
 		if err := os.Mkdir(psinfoDir, os.ModePerm); err != nil {
 			fmt.Fprintf(os.Stderr, "Could not create directory: %s", err)
