@@ -31,7 +31,7 @@ func (z *IllumosZones) Gather(acc telegraf.Accumulator) error {
 	return nil
 }
 
-var zoneBootTime = func(zoneName string, zoneID int) (interface{}, error) {
+var zoneBootTime = func(zoneName helpers.ZoneName, zoneID int) (interface{}, error) {
 	token, err := kstat.Open()
 	if err != nil {
 		log.Print("cannot get kstat token")
@@ -41,8 +41,7 @@ var zoneBootTime = func(zoneName string, zoneID int) (interface{}, error) {
 
 	defer token.Close()
 
-	bootTime, err := token.GetNamed("zones", zoneID, zoneName, "boot_time")
-
+	bootTime, err := token.GetNamed("zones", zoneID, string(zoneName), "boot_time")
 	// Not being able to get a zone boot time probably isn't really an error. It just means the zone
 	// isn't running.
 	if err != nil {
@@ -52,9 +51,8 @@ var zoneBootTime = func(zoneName string, zoneID int) (interface{}, error) {
 	return helpers.NamedValue(bootTime), nil
 }
 
-var zoneUptime = func(zoneName string, zoneID int) float64 {
+var zoneUptime = func(zoneName helpers.ZoneName, zoneID int) float64 {
 	bootTime, err := zoneBootTime(zoneName, zoneID)
-
 	if err != nil {
 		return -1
 	}
@@ -64,11 +62,10 @@ var zoneUptime = func(zoneName string, zoneID int) float64 {
 
 // zoneAge tries to give you the age of a zone by inspecting the mtime of the XML file which
 // zonecfg(1m) creates when it makes the zone. There may be a better way. Let me know.
-func zoneAge(zoneDir, zoneName string) (float64, error) {
+func zoneAge(zoneDir string, zoneName helpers.ZoneName) (float64, error) {
 	zoneFile := path.Join(zoneDir, fmt.Sprintf("%s.xml", zoneName))
 
 	fh, err := os.Stat(zoneFile)
-
 	if err != nil {
 		return 0, err
 	}
@@ -83,7 +80,7 @@ func gatherProperties(acc telegraf.Accumulator, zonemap helpers.ZoneMap) {
 		}
 
 		tags := map[string]string{
-			"name":   zone,
+			"name":   string(zone),
 			"status": zoneData.Status,
 			"ipType": zoneData.IPType,
 			"brand":  zoneData.Brand,

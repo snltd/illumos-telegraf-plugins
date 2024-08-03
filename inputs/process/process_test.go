@@ -54,7 +54,7 @@ func TestPlugin(t *testing.T) {
 	acc := testutil.Accumulator{}
 	require.NoError(t, s.Gather(&acc))
 
-	var testMetricsFull = []telegraf.Metric{
+	testMetricsFull := []telegraf.Metric{
 		testutil.MustMetric(
 			"process",
 			map[string]string{
@@ -398,14 +398,12 @@ func psinfoFromFixture(pid int) psinfo_t {
 
 	filename := path.Join("testdata", "proc", fmt.Sprint(pid), "psinfo")
 	raw, err := os.Open(filename)
-
 	if err != nil {
 		log.Fatalf("Could not load serialized data from disk: %v\n", err)
 	}
 
 	dec := gob.NewDecoder(raw)
 	err = dec.Decode(&ret)
-
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Could not load decode prstat data: %v\n", err)
 		os.Exit(1)
@@ -419,14 +417,12 @@ func usageFromFixture(pid int) prusage_t {
 
 	filename := path.Join("testdata", "proc", fmt.Sprint(pid), "usage")
 	raw, err := os.Open(filename)
-
 	if err != nil {
 		log.Fatalf("Could not load serialized data from disk: %v\n", err)
 	}
 
 	dec := gob.NewDecoder(raw)
 	err = dec.Decode(&ret)
-
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Could not load decode prusage data: %v\n", err)
 		os.Exit(1)

@@ -4,13 +4,14 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/snltd/illumos-telegraf-plugins/helpers"
 	"github.com/stretchr/testify/require"
 )
 
 func TestToUpdatePkg(t *testing.T) {
 	t.Parallel()
 
-	runPkgListCmd = func(zone string) (string, error) { return samplePkgListOutput, nil }
+	runPkgListCmd = func(zone helpers.ZoneName) (string, error) { return samplePkgListOutput, nil }
 	result, _ := toUpdatePkg("test-zone")
 	require.Equal(t, 43, result)
 }
@@ -18,7 +19,7 @@ func TestToUpdatePkg(t *testing.T) {
 func TestToUpdatePkgNothing(t *testing.T) {
 	t.Parallel()
 
-	runPkgListCmd = func(zone string) (string, error) { return "", errors.New(noUpdatesMessage) }
+	runPkgListCmd = func(zone helpers.ZoneName) (string, error) { return "", errors.New(noUpdatesMessage) }
 	result, _ := toUpdatePkg("test-zone")
 	require.Equal(t, 0, result)
 }
@@ -26,7 +27,7 @@ func TestToUpdatePkgNothing(t *testing.T) {
 func TestToUpdatePkgin(t *testing.T) {
 	t.Parallel()
 
-	runPkginUpgradeCmd = func(zone string) (string, error) {
+	runPkginUpgradeCmd = func(zone helpers.ZoneName) (string, error) {
 		return samplePkginUpgradeOutput, nil
 	}
 
@@ -37,7 +38,7 @@ func TestToUpdatePkgin(t *testing.T) {
 func TestToUpdatePkginBadOutput(t *testing.T) {
 	t.Parallel()
 
-	runPkginUpgradeCmd = func(zone string) (string, error) { return "", nil }
+	runPkginUpgradeCmd = func(zone helpers.ZoneName) (string, error) { return "", nil }
 	result, _ := toUpdatePkgin("test-zone")
 	require.Equal(t, 0, result)
 }

@@ -10,15 +10,15 @@ func TestZoneMapNames(t *testing.T) {
 	t.Parallel()
 
 	zoneMap := ParseZones(zoneadmOutput)
-	require.ElementsMatch(t, []string{"global", "cube-media", "cube-ws"}, zoneMap.Names())
+	require.ElementsMatch(t, []ZoneName{"global", "cube-media", "cube-ws"}, zoneMap.Names())
 }
 
 func TestZoneMapRunning(t *testing.T) {
 	t.Parallel()
 
 	zoneMap := ParseZones(zoneadmOutput)
-	require.ElementsMatch(t, []string{"global", "cube-media"}, zoneMap.InState("running"))
-	require.ElementsMatch(t, []string{"cube-ws"}, zoneMap.InState("installed"))
+	require.ElementsMatch(t, []ZoneName{"global", "cube-media"}, zoneMap.InState("running"))
+	require.ElementsMatch(t, []ZoneName{"cube-ws"}, zoneMap.InState("installed"))
 	require.ElementsMatch(t, []string{}, zoneMap.InState("configured"))
 }
 
@@ -96,7 +96,7 @@ func TestZoneByID(t *testing.T) {
 	t.Parallel()
 
 	zoneMap := ParseZones(zoneadmOutput)
-	require.ElementsMatch(t, []string{"global", "cube-media", "cube-ws"}, zoneMap.Names())
+	require.ElementsMatch(t, []ZoneName{"global", "cube-media", "cube-ws"}, zoneMap.Names())
 
 	zoneData, err := zoneMap.ZoneByID(42)
 

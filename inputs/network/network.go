@@ -28,14 +28,21 @@ func (s *IllumosNetwork) SampleConfig() string {
 }
 
 type IllumosNetwork struct {
-	Zones  []string
+	Zones  []helpers.ZoneName
 	Fields []string
 	Vnics  []string
 }
 
+type zoneTagMap struct {
+	zone  helpers.ZoneName
+	link  string
+	speed string
+	name  string
+}
+
 var (
 	makeZoneVnicMap = helpers.NewZoneVnicMap
-	zoneName        = ""
+	zoneName        = helpers.ZoneName("")
 )
 
 func (s *IllumosNetwork) Gather(acc telegraf.Accumulator) error {
@@ -74,31 +81,38 @@ func (s *IllumosNetwork) Gather(acc telegraf.Accumulator) error {
 			continue
 		}
 
+		zoneTags := zoneTags(zone, link.Name, vnic)
+		zoneTagsMap := make(map[string]string)
+		zoneTagsMap["zone"] = string(zoneTags.zone)
+		zoneTagsMap["link"] = zoneTags.link
+		zoneTagsMap["speed"] = zoneTags.speed
+		zoneTagsMap["name"] = zoneTags.name
+
 		acc.AddFields(
 			"net",
 			parseNamedStats(s, stats),
-			zoneTags(zone, link.Name, vnic),
+			zoneTagsMap,
 		)
 	}
 
 	return nil
 }
 
-func zoneTags(zone, link string, vnic helpers.Vnic) map[string]string {
+func zoneTags(zone helpers.ZoneName, link string, vnic helpers.Vnic) zoneTagMap {
 	if zone == zoneName {
-		return map[string]string{
-			"zone":  zoneName,
-			"link":  "none",
-			"speed": "unknown",
-			"name":  link,
+		return zoneTagMap{
+			zone:  zoneName,
+			link:  "none",
+			speed: "unknown",
+			name:  link,
 		}
 	}
 
-	return map[string]string{
-		"zone":  vnic.Zone,
-		"link":  vnic.Link,
-		"speed": fmt.Sprintf("%dmbit", vnic.Speed),
-		"name":  vnic.Name,
+	return zoneTagMap{
+		zone:  vnic.Zone,
+		link:  vnic.Link,
+		speed: fmt.Sprintf("%dmbit", vnic.Speed),
+		name:  vnic.Name,
 	}
 }
 
@@ -117,7 +131,7 @@ func parseNamedStats(s *IllumosNetwork, stats []*kstat.Named) map[string]interfa
 }
 
 func init() {
-	zoneName = helpers.ZoneName()
+	zoneName = helpers.CurrentZone()
 
 	inputs.Add("illumos_network", func() telegraf.Input { return &IllumosNetwork{} })
 }
