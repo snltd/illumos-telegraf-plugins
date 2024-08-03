@@ -100,7 +100,6 @@ func createTags(token *kstat.Token, mod, device string) map[string]string {
 
 	deviceRegex := regexp.MustCompile("[0-9]+$")
 	instance, err := strconv.Atoi(deviceRegex.FindString(device))
-
 	if err != nil {
 		return tags
 	}

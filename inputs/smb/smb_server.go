@@ -11,7 +11,7 @@ import (
 
 var sampleConfig = `
 	## The kstat fields you wish to emit. 
-	# fields = ["open_files"] 
+	# Fields = ["open_files"] 
 `
 
 func (s *IllumosSmbServer) Description() string {
@@ -26,17 +26,28 @@ type IllumosSmbServer struct {
 	Fields []string
 }
 
-func (s *IllumosSmbServer) Gather(acc telegraf.Accumulator) error {
+var getKStats = func() ([]*kstat.KStat, error) {
 	token, err := kstat.Open()
 	if err != nil {
 		log.Print("cannot get kstat token")
 
+		return []*kstat.KStat{}, err
+	}
+
+	token.Close()
+
+	return helpers.KStatsInModule(token, "smbsrv"), nil
+}
+
+func (s *IllumosSmbServer) Gather(acc telegraf.Accumulator) error {
+	kstats, err := getKStats()
+
+	if err != nil {
+		log.Println("failed to get smbsrv kstats")
 		return err
 	}
 
-	stats := helpers.KStatsInModule(token, "smbsrv")
-
-	for _, stat := range stats {
+	for _, stat := range kstats {
 		stats, err := stat.AllNamed()
 
 		if err == nil {
@@ -47,8 +58,6 @@ func (s *IllumosSmbServer) Gather(acc telegraf.Accumulator) error {
 			)
 		}
 	}
-
-	token.Close()
 
 	return nil
 }

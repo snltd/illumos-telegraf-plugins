@@ -1,15 +1,28 @@
 package smbserver
 
 import (
-	// "fmt"
+	"fmt"
 	"testing"
 
-	// "github.com/influxdata/telegraf/testutil"
+	"github.com/influxdata/telegraf/testutil"
 	"github.com/snltd/illumos-telegraf-plugins/helpers"
 	"github.com/stretchr/testify/require"
 )
 
-// My dev zone doesn't have any smbsrv kstats, so this is as much testing as I can do.
+func TestPlugin(t *testing.T) {
+	t.Parallel()
+
+	s := &IllumosSmbServer{
+		Fields: []string{"open_files", "connections"},
+	}
+
+	acc := testutil.Accumulator{}
+	require.NoError(t, s.Gather(&acc))
+	metric := acc.GetTelegrafMetrics()
+
+	fmt.Printf("%v\n", metric)
+}
+
 func TestParseNamedStats(t *testing.T) {
 	t.Parallel()
 
@@ -24,8 +37,8 @@ func TestParseNamedStats(t *testing.T) {
 		t,
 		fields,
 		map[string]interface{}{
-			"connections": float64(1),
-			"open_files":  float64(0),
+			"connections": float64(2),
+			"open_files":  float64(3),
 		},
 	)
 }

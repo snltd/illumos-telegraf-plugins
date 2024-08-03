@@ -12,7 +12,7 @@ func TestPlugin(t *testing.T) {
 	t.Parallel()
 
 	s := &IllumosIO{
-		Devices: []string{"sd1"},
+		Devices: []string{"sd0"},
 		Modules: []string{"sd", "zfs"},
 		Fields:  []string{"reads", "nread", "writes", "nwritten"},
 	}
