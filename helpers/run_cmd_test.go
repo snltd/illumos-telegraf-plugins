@@ -59,7 +59,7 @@ func TestRunCmdZlogin(t *testing.T) {
 
 	// This can raise different errors depending on the zone it's run in, and possibly on
 	// privileges, so let's just assert an error.
-	stdout, stderr, err := RunCmdInZone("no-such-zone", "/bin/date")
+	stdout, stderr, err := RunCmdInZone("/bin/date", "no-such-zone")
 	require.Equal(t, "", stdout)
 	require.NotEqual(t, "", stderr)
 	require.Error(t, err)

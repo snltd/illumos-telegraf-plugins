@@ -1,6 +1,7 @@
 package patches
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -9,33 +10,36 @@ import (
 func TestToUpdatePkg(t *testing.T) {
 	t.Parallel()
 
-	runPkgListCmd = func() string { return samplePkgListOutput }
-
-	require.Equal(t, 43, toUpdatePkg())
+	runPkgListCmd = func(zone string) (string, error) { return samplePkgListOutput, nil }
+	result, _ := toUpdatePkg("test-zone")
+	require.Equal(t, 43, result)
 }
 
 func TestToUpdatePkgNothing(t *testing.T) {
 	t.Parallel()
 
-	runPkgListCmd = func() string { return "" }
-
-	require.Equal(t, 0, toUpdatePkg())
+	runPkgListCmd = func(zone string) (string, error) { return "", errors.New(noUpdatesMessage) }
+	result, _ := toUpdatePkg("test-zone")
+	require.Equal(t, 0, result)
 }
 
 func TestToUpdatePkgin(t *testing.T) {
 	t.Parallel()
 
-	runPkginUpgradeCmd = func() string { return samplePkginUpgradeOutput }
+	runPkginUpgradeCmd = func(zone string) (string, error) {
+		return samplePkginUpgradeOutput, nil
+	}
 
-	require.Equal(t, 17, toUpdatePkgin())
+	result, _ := toUpdatePkgin("test-zone")
+	require.Equal(t, 17, result)
 }
 
 func TestToUpdatePkginBadOutput(t *testing.T) {
 	t.Parallel()
 
-	runPkginUpgradeCmd = func() string { return "" }
-
-	require.Equal(t, -1, toUpdatePkgin())
+	runPkginUpgradeCmd = func(zone string) (string, error) { return "", nil }
+	result, _ := toUpdatePkgin("test-zone")
+	require.Equal(t, 0, result)
 }
 
 var samplePkgListOutput = `SUNWcs                                            0.5.11-151038.0            i--

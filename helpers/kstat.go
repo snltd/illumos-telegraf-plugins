@@ -2,8 +2,9 @@ package helpers
 
 import (
 	"fmt"
-	kstat "github.com/illumos/go-kstat"
 	"log"
+
+	kstat "github.com/illumos/go-kstat"
 )
 
 // pulled out into a function to facilitate testing.

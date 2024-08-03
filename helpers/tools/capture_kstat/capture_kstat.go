@@ -17,7 +17,7 @@ import (
 
 func main() {
 	if len(os.Args) != 2 {
-		fmt.Fprintln(os.Stderr, "usage: capture-kstat <kstat>")
+		fmt.Fprintln(os.Stderr, "usage: capture_kstat <kstat>")
 		os.Exit(1)
 	}
 
@@ -55,14 +55,12 @@ func main() {
 
 	enc := gob.NewEncoder(&buf)
 	err = enc.Encode(stats)
-
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Could not encode data %v\n", err)
 		os.Exit(1)
 	}
 
 	err = os.WriteFile(file, buf.Bytes(), 0o644) //nolint
-
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Could not write serialized data to disk: %v\n", err)
 		os.Exit(1)
