@@ -65,10 +65,12 @@ type procObject struct {
 	Tags   procObjectTags
 }
 
-type contractMap map[id_t]string
-type procObjectValues map[string]interface{}
-type procObjectTags map[string]string
-type procObjectMap map[int]procObject
+type (
+	contractMap      map[id_t]string
+	procObjectValues map[string]interface{}
+	procObjectTags   map[string]string
+	procObjectMap    map[int]procObject
+)
 
 var procRootDir = "/proc"
 
@@ -78,13 +80,11 @@ func toNs(ts timestruc_t) int64 {
 
 func newProcObject(s *IllumosProcess, pid int) (procObject, error) {
 	psinfo, err := loadProcPsinfo(pid)
-
 	if err != nil {
 		return procObject{}, err
 	}
 
 	prusage, err := loadProcUsage(pid)
-
 	if err != nil {
 		return procObject{}, err
 	}
@@ -207,7 +207,6 @@ func newProcObjectMap(s *IllumosProcess, procs []fs.DirEntry) procObjectMap {
 
 	for _, proc := range procs {
 		pid, err := strconv.Atoi(proc.Name())
-
 		if err != nil {
 			log.Printf("cannot process pid %v", proc)
 			continue
@@ -246,7 +245,6 @@ func newContractMap(svcsOutput string) contractMap {
 
 func allProcs() []fs.DirEntry {
 	procs, err := os.ReadDir(procRootDir)
-
 	if err != nil {
 		log.Fatalf("cannot read %s", procRootDir)
 	}
@@ -263,7 +261,7 @@ func expandZoneTag(processMap *procObjectMap, zoneMap helpers.ZoneMap) {
 			if err == nil {
 				zone, err := zoneMap.ZoneByID(zoneId)
 				if err == nil {
-					procObj.Tags["zone"] = zone.Name
+					procObj.Tags["zone"] = string(zone.Name)
 				}
 			}
 		}
@@ -378,7 +376,6 @@ var loadProcUsage = func(pid int) (prusage_t, error) {
 	file := fmt.Sprintf("/proc/%d/usage", pid)
 	var prusage prusage_t
 	fh, err := os.Open(file)
-
 	// Often the process is gone before we get to inspect it. Don't bother
 	// logging an error.
 	if err != nil {
@@ -386,7 +383,6 @@ var loadProcUsage = func(pid int) (prusage_t, error) {
 	}
 
 	err = binary.Read(fh, binary.LittleEndian, &prusage)
-
 	if err != nil {
 		log.Printf("cannot parse %s\n", file)
 		return prusage, err
@@ -399,13 +395,11 @@ var loadProcPsinfo = func(pid int) (psinfo_t, error) {
 	file := path.Join(procRootDir, fmt.Sprint(pid), "psinfo")
 	var psinfo psinfo_t
 	fh, err := os.Open(file)
-
 	if err != nil {
 		return psinfo, err
 	}
 
 	err = binary.Read(fh, binary.LittleEndian, &psinfo)
-
 	if err != nil {
 		log.Printf("cannot parse %s\n", file)
 		return psinfo, err

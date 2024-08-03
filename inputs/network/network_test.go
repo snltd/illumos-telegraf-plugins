@@ -13,7 +13,7 @@ func TestParseNamedStats(t *testing.T) {
 
 	s := &IllumosNetwork{
 		Fields: []string{"obytes64", "rbytes64", "ipackets64"},
-		Zones:  []string{"cube-dns"},
+		Zones:  []helpers.ZoneName{"cube-dns"},
 	}
 
 	testData := helpers.FromFixture("link--0--dns_net0.kstat")
@@ -35,7 +35,7 @@ func TestParseNamedStatsNoSelectedNics(t *testing.T) {
 
 	s := &IllumosNetwork{
 		Fields: []string{"obytes64", "rbytes64", "ipackets64"},
-		Zones:  []string{"cube-dns"},
+		Zones:  []helpers.ZoneName{"cube-dns"},
 		Vnics:  []string{"net0"},
 	}
 
@@ -51,11 +51,11 @@ func TestZoneTags(t *testing.T) {
 
 	require.Equal(
 		t,
-		map[string]string{
-			"zone":  "cube-dns",
-			"link":  "rge0",
-			"speed": "1000mbit",
-			"name":  "dns_net0",
+		zoneTagMap{
+			zone:  "cube-dns",
+			link:  "rge0",
+			speed: "1000mbit",
+			name:  "dns_net0",
 		},
 		zoneTags("cube-dns", "dns_net0", helpers.ParseZoneVnics(sampleDladmOutput)["dns_net0"]),
 	)
@@ -68,11 +68,11 @@ func TestZoneTagsGlobal(t *testing.T) {
 
 	require.Equal(
 		t,
-		map[string]string{
-			"zone":  "global",
-			"link":  "none",
-			"speed": "unknown",
-			"name":  "rge0",
+		zoneTagMap{
+			zone:  "global",
+			link:  "none",
+			speed: "unknown",
+			name:  "rge0",
 		},
 		zoneTags("global", "rge0", helpers.ParseZoneVnics(sampleDladmOutput)["rge0"]),
 	)

@@ -16,7 +16,7 @@ func TestPlugin(t *testing.T) {
 	s := &IllumosZones{}
 
 	// Return a predictable boot time for each zone in the zoneadmOutput
-	zoneBootTime = func(zoneName string, _ int) (interface{}, error) {
+	zoneBootTime = func(zoneName helpers.ZoneName, _ int) (interface{}, error) {
 		var ts float64
 
 		if zoneName == "cube-media" {

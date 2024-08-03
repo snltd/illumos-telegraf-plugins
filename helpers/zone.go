@@ -10,7 +10,7 @@ import (
 
 type Zone struct {
 	ID      int
-	Name    string
+	Name    ZoneName
 	Status  string
 	Path    string
 	UUID    string
@@ -21,16 +21,18 @@ type Zone struct {
 
 type Vnic struct {
 	Name  string
-	Zone  string
+	Zone  ZoneName
 	Link  string
 	Speed int
 }
 
 // ZoneMap maps the name of a zone to a zone struct containing all its zoneadm properties.
-type ZoneMap map[string]Zone
+type ZoneMap map[ZoneName]Zone
 
 // ZoneVnicMap maps a VNIC name to a vnic struct which explains it.
 type ZoneVnicMap map[string]Vnic
+
+type ZoneName string
 
 // NewZoneMap creates a ZoneMap describing the current state of the system.
 func NewZoneMap() ZoneMap {
@@ -57,8 +59,8 @@ func NewZoneVnicMap() ZoneVnicMap {
 }
 
 // Names returns a list of zones in the map.
-func (z ZoneMap) Names() []string {
-	zones := []string{}
+func (z ZoneMap) Names() []ZoneName {
+	zones := []ZoneName{}
 
 	for zone := range z {
 		zones = append(zones, zone)
@@ -79,8 +81,8 @@ func (z ZoneMap) ZoneByID(id int) (Zone, error) {
 }
 
 // Names returns a list of zones in the map.
-func (z ZoneMap) InState(state string) []string {
-	zones := []string{}
+func (z ZoneMap) InState(state string) []ZoneName {
+	zones := []ZoneName{}
 
 	for zone, data := range z {
 		if data.Status == state {
@@ -92,13 +94,13 @@ func (z ZoneMap) InState(state string) []string {
 }
 
 // ZoneName returns the name of the current zone.
-func ZoneName() string {
+func CurrentZone() ZoneName {
 	stdout, _, err := RunCmd("/bin/zonename")
 	if err != nil {
 		log.Fatal("could not get zonename")
 	}
 
-	return stdout
+	return ZoneName(stdout)
 }
 
 // ParseZones turns a chunk of raw `zoneadm list -p` output into a ZoneMap. It is public so
@@ -136,7 +138,7 @@ func parseZone(raw string) (Zone, error) {
 
 	return Zone{
 		zoneID,
-		chunks[1],
+		ZoneName(chunks[1]),
 		chunks[2],
 		chunks[3],
 		chunks[4],
@@ -166,7 +168,7 @@ func parseZoneVnic(raw string) Vnic {
 
 	return Vnic{
 		chunks[0],
-		chunks[1],
+		ZoneName(chunks[1]),
 		chunks[2],
 		speed,
 	}

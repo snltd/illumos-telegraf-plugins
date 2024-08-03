@@ -22,7 +22,7 @@ var sampleConfig = `
 	# refresh = false
 `
 
-var runningZones = func() []string {
+var runningZones = func() []helpers.ZoneName {
 	zoneMap := helpers.NewZoneMap()
 	return zoneMap.InState("running")
 }
@@ -41,7 +41,7 @@ func (s *IllumosPatches) SampleConfig() string {
 	return sampleConfig
 }
 
-func gatherZone(zone string, refresh bool) (map[string]interface{}, map[string]string) {
+func gatherZone(zone helpers.ZoneName, refresh bool) (map[string]interface{}, map[string]string) {
 	retValues := make(map[string]interface{})
 	retTags := make(map[string]string)
 
@@ -57,7 +57,7 @@ func gatherZone(zone string, refresh bool) (map[string]interface{}, map[string]s
 		} else {
 			retValues["upgradeable"] = packagesToUpdate
 			retTags["format"] = "pkg"
-			retTags["zone"] = zone
+			retTags["zone"] = string(zone)
 		}
 	}
 
@@ -69,14 +69,14 @@ func gatherZone(zone string, refresh bool) (map[string]interface{}, map[string]s
 		} else {
 			retValues["upgradeable"] = packagesToUpdate
 			retTags["format"] = "pkgin"
-			retTags["zone"] = zone
+			retTags["zone"] = string(zone)
 		}
 	}
 
 	return retValues, retTags
 }
 
-func toUpdatePkg(zone string) (int, error) {
+func toUpdatePkg(zone helpers.ZoneName) (int, error) {
 	raw, err := runPkgListCmd(zone)
 	if err != nil {
 		return 0, err
@@ -85,7 +85,7 @@ func toUpdatePkg(zone string) (int, error) {
 	return len(strings.Split(raw, "\n")), nil
 }
 
-func toUpdatePkgin(zone string) (int, error) {
+func toUpdatePkgin(zone helpers.ZoneName) (int, error) {
 	pkginOutput, err := runPkginUpgradeCmd(zone)
 	if err != nil {
 		log.Print("failed to run pkgin")
@@ -109,7 +109,7 @@ func toUpdatePkgin(zone string) (int, error) {
 	return 0, errors.New("did not find pkgin 'to upgrade' value")
 }
 
-func refreshPkg(zone string) error {
+func refreshPkg(zone helpers.ZoneName) error {
 	// This needs elevated privileges
 	stdout, stderr, err := helpers.RunCmdInZone("/bin/pkg refresh", zone)
 	if err != nil {
@@ -122,7 +122,7 @@ func refreshPkg(zone string) error {
 	return nil
 }
 
-var runPkgListCmd = func(zone string) (string, error) {
+var runPkgListCmd = func(zone helpers.ZoneName) (string, error) {
 	stdout, stderr, err := helpers.RunCmdInZone("/bin/pkg list -uH", zone)
 	// `pkg list -u` exits 1 if there are no packages to upgrade, so an error
 	// might not be an error.
@@ -136,7 +136,7 @@ var runPkgListCmd = func(zone string) (string, error) {
 	return stdout, nil
 }
 
-var runPkginUpgradeCmd = func(zone string) (string, error) {
+var runPkginUpgradeCmd = func(zone helpers.ZoneName) (string, error) {
 	stdout, stderr, err := helpers.RunCmdInZone("echo n | /opt/local/bin/pkgin upgrade", zone)
 	if err != nil {
 		log.Print(stderr)
@@ -147,11 +147,11 @@ var runPkginUpgradeCmd = func(zone string) (string, error) {
 	return stdout, nil
 }
 
-func havePkg5(zone string) bool {
+func havePkg5(zone helpers.ZoneName) bool {
 	return helpers.HaveFileInZone(pkg5Binary, zone)
 }
 
-func havePkgin(zone string) bool {
+func havePkgin(zone helpers.ZoneName) bool {
 	return helpers.HaveFileInZone(pkginBinary, zone)
 }
 
