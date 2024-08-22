@@ -32,29 +32,13 @@ func (s *IllumosOS) SampleConfig() string {
 type IllumosOS struct{}
 
 var runUnameCmd = func() string {
-	stdout, stderr, err := helpers.RunCmdPfexec("/bin/uname -v")
-
+	stdout, stderr, err := helpers.RunCmd("/bin/uname -v")
 	if err != nil {
 		log.Print(stderr)
 		log.Print(err)
 	}
 
 	return stdout
-}
-
-func (s *IllumosOS) Gather(acc telegraf.Accumulator) error {
-	osReleaseContents, err := os.ReadFile(osRelease)
-
-	if err != nil {
-		return err
-	}
-
-	tags := parseOsRelease(string(osReleaseContents))
-	tags["kernel"] = runUnameCmd()
-
-	acc.AddFields("os", map[string]interface{}{"release": 1}, tags)
-
-	return nil
 }
 
 func parseOsRelease(osRelease string) map[string]string {
@@ -76,6 +60,20 @@ func parseOsRelease(osRelease string) map[string]string {
 	}
 
 	return ret
+}
+
+func (s *IllumosOS) Gather(acc telegraf.Accumulator) error {
+	osReleaseContents, err := os.ReadFile(osRelease)
+	if err != nil {
+		return err
+	}
+
+	tags := parseOsRelease(string(osReleaseContents))
+	tags["kernel"] = runUnameCmd()
+
+	acc.AddFields("os", map[string]interface{}{"release": 1}, tags)
+
+	return nil
 }
 
 func init() {

@@ -75,7 +75,7 @@ _ "github.com/snltd/illumos-telegraf-plugins/inputs/memory"
 _ "github.com/snltd/illumos-telegraf-plugins/inputs/network"
 _ "github.com/snltd/illumos-telegraf-plugins/inputs/nfs_client"
 _ "github.com/snltd/illumos-telegraf-plugins/inputs/nfs_server"
-_ "github.com/snltd/illumos-telegraf-plugins/inputs/patches"
+_ "github.com/snltd/illumos-telegraf-plugins/inputs/packages"
 _ "github.com/snltd/illumos-telegraf-plugins/inputs/smf"
 _ "github.com/snltd/illumos-telegraf-plugins/inputs/zfs_arc"
 _ "github.com/snltd/illumos-telegraf-plugins/inputs/zones"
@@ -130,15 +130,17 @@ etc. All points relate to an error, so if there are no errors, you get no points
 
 ### fma
 A very experimental plugin which parses the output of `fmadm(1m)` and
-`fmstat(1m)` to produce information on system failures.
+`fmstat(1m)` to produce information on system failures. Requires elevated 
+privileges for `fmadm`.
 
 ### io
-Gets data about IO throughput.
+Gets data about IO throughput, by device or by ZFS pool.
 
 ### memory
 Aggregates virtual memory information from a number of kstats and, if you want
 it, the output of `swap(1m)`. Swapping/paging info defaults to per-cpu, but
-can be aggregated to save point rate.
+can be aggregated to save point rate. Can report NGZ memory usage if running
+in the global zone.
 
 ### network
 Collects network KStats. If Telegraf is running in the global zone, the plugin
@@ -150,23 +152,33 @@ zone has its own set of KStats, so if you want per-zone NFS stats, you'll have
 to run Telegraf in the zones.
 
 ### nfs_server
-NFS server KStats. Not much more to say.
+NFS server KStats. The same zone limitations apply as for the client.
 
-### patches
-Tells you how many of your installed packages are ready for upgrade. Needs
-something going round refreshing the package cache, because it can't do it
-itself.
+### os
+Gives you a few statistics about the kernel and OS revision.
+
+### packages
+Tells you how many packages you have installed, and how many are ready for 
+upgrade.  Can refresh the package cache, if you wish it too. Works with `pkg(5)`
+and pkgsrc zones. Needs `sudo` or `pfexec` configuring to work properly, as
+well as the `file_dac_search` privilege.
+
+### process
+Works a bit like `prstat(8)`, showing what processes are spending time on CPU
+or in memory. Works across all zones.
 
 ### smf
 Parses the output of `svcs(1m)` to count the number of SMF services in
 particular states. Also reports errant services with sufficient tagging to
-easily track them down and fix them.
+easily track them down and fix them. Can report non-global zones from the global
+if you set up `pfexec` or `sudo` to allow it.
 
 ### zfs_arc
 Reports ZFS ARC statistics.
 
 ### zones
-Turns `zoneadm list` into numbers, and tells you how old your zones are.
+Turns `zoneadm list` into numbers, and tells you how old your zones are and
+how long they've been up.
 
 ### zpool
 High-level ZFS pool statistics from the output of `zpool list`.

@@ -87,7 +87,7 @@ func TestPlugin(t *testing.T) {
 		FmstatModules: []string{"software-response", "zfs-retire"},
 	}
 
-	runFmadmFaultyCmd = func() string {
+	runFmadmFaultyCmd = func(cmdPrefix string) string {
 		ret, _ := os.ReadFile("testdata/fmadm_output.txt")
 
 		return string(ret)

@@ -1,4 +1,4 @@
-package patches
+package packages
 
 import (
 	"errors"
@@ -11,35 +11,35 @@ import (
 func TestToUpdatePkg(t *testing.T) {
 	t.Parallel()
 
-	runPkgListCmd = func(zone helpers.ZoneName) (string, error) { return samplePkgListOutput, nil }
-	result, _ := toUpdatePkg("test-zone")
+	runPkgListCmd = func(cmdPrefix string, zone helpers.ZoneName) (string, error) { return samplePkgListOutput, nil }
+	result, _ := toUpdatePkg("/bin/sudo", "test-zone")
 	require.Equal(t, 43, result)
 }
 
 func TestToUpdatePkgNothing(t *testing.T) {
 	t.Parallel()
 
-	runPkgListCmd = func(zone helpers.ZoneName) (string, error) { return "", errors.New(noUpdatesMessage) }
-	result, _ := toUpdatePkg("test-zone")
+	runPkgListCmd = func(cmdPrefix string, zone helpers.ZoneName) (string, error) { return "", errors.New(noUpdatesMessage) }
+	result, _ := toUpdatePkg("/bin/sudo", "test-zone")
 	require.Equal(t, 0, result)
 }
 
 func TestToUpdatePkgin(t *testing.T) {
 	t.Parallel()
 
-	runPkginUpgradeCmd = func(zone helpers.ZoneName) (string, error) {
+	runPkginUpgradeCmd = func(cmdPrefix string, zone helpers.ZoneName) (string, error) {
 		return samplePkginUpgradeOutput, nil
 	}
 
-	result, _ := toUpdatePkgin("test-zone")
+	result, _ := toUpdatePkgin("/bin/sudo", "test-zone")
 	require.Equal(t, 17, result)
 }
 
 func TestToUpdatePkginBadOutput(t *testing.T) {
 	t.Parallel()
 
-	runPkginUpgradeCmd = func(zone helpers.ZoneName) (string, error) { return "", nil }
-	result, _ := toUpdatePkgin("test-zone")
+	runPkginUpgradeCmd = func(cmdPrefix string, zone helpers.ZoneName) (string, error) { return "", nil }
+	result, _ := toUpdatePkgin("/bin/sudo", "test-zone")
 	require.Equal(t, 0, result)
 }
 

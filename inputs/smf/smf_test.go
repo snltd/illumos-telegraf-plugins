@@ -18,7 +18,7 @@ func TestPlugin(t *testing.T) {
 		GenerateDetails: true,
 	}
 
-	rawSvcsOutput = func() string {
+	rawSvcsOutput = func(s IllumosSmf) string {
 		return sampleOutput
 	}
 

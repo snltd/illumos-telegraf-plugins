@@ -1,6 +1,7 @@
 package fma
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -19,13 +20,18 @@ var sampleConfig = `
 	# fmstat_fields = []
 	## Whether to report fmadm(1m) metrics
 	# fmadm = true
+	## Use this command to get elevated privileges required to run fmadm. 
+	## Should be a path, like "/bin/sudo" "/bin/pfexec", but can also be "none", which will 
+	## omit the fmadm collection.
+	# elevate_privs_with = "/bin/sudo"
 `
 
 type IllumosFma struct {
-	Fmstat        bool
-	FmstatModules []string
-	FmstatFields  []string
-	Fmadm         bool
+	Fmstat           bool
+	FmstatModules    []string
+	FmstatFields     []string
+	Fmadm            bool
+	ElevatePrivsWith string
 }
 
 type Fmstat struct {
@@ -43,8 +49,7 @@ func (s *IllumosFma) SampleConfig() string {
 }
 
 var runFmstatCmd = func() string {
-	stdout, stderr, err := helpers.RunCmdPfexec("/usr/sbin/fmstat")
-
+	stdout, stderr, err := helpers.RunCmd("/usr/sbin/fmstat")
 	if err != nil {
 		log.Print(stderr)
 		log.Print(err)
@@ -53,29 +58,15 @@ var runFmstatCmd = func() string {
 	return stdout
 }
 
-var runFmadmFaultyCmd = func() string {
-	stdout, stderr, err := helpers.RunCmdPfexec("/usr/sbin/fmadm faulty -arf")
-
+var runFmadmFaultyCmd = func(cmdPrefix string) string {
+	stdout, stderr, err := helpers.RunCmd(
+		fmt.Sprintf("%s /usr/sbin/fmadm faulty -arf", cmdPrefix))
 	if err != nil {
 		log.Print(stderr)
 		log.Print(err)
 	}
 
 	return stdout
-}
-
-func (s *IllumosFma) Gather(acc telegraf.Accumulator) error {
-	// There's no error handling in here. I'm not really sure what errors we might need to handle,
-	// so if this ever gets used, it will need improvement.
-	if s.Fmstat {
-		gatherFmstat(s, acc)
-	}
-
-	if s.Fmadm {
-		gatherFmadm(acc)
-	}
-
-	return nil
 }
 
 func gatherFmstat(s *IllumosFma, acc telegraf.Accumulator) {
@@ -104,15 +95,14 @@ func gatherFmstat(s *IllumosFma, acc telegraf.Accumulator) {
 // fmadm faults than Illumos does. Lacking that, I've fallen back to the short form of `fmadm
 // faulty -arf`. This outputs one fault per line, of the form
 //
-//    zfs://pool=big/vdev=3706b5d93e20f727                                  faulted
+//	zfs://pool=big/vdev=3706b5d93e20f727                                  faulted
 //
 // Problem is, I've only seen that one fault since I wrote this plugin, plus another example I
 // found in the Illumos source! So this function, and
 // probably the rest of this plugin, could be subject to severe revision.
 // So far as I can tell, impacts are unique, so we send a value of "1" for every impact.
-//
-func gatherFmadm(acc telegraf.Accumulator) {
-	raw := runFmadmFaultyCmd()
+func gatherFmadm(acc telegraf.Accumulator, cmdPrefix string) {
+	raw := runFmadmFaultyCmd(cmdPrefix)
 
 	for _, impact := range strings.Split(raw, "\n") {
 		if strings.Contains(impact, "://") {
@@ -168,6 +158,20 @@ func parseFmadmImpact(impact string) map[string]string {
 	}
 
 	return ret
+}
+
+func (s *IllumosFma) Gather(acc telegraf.Accumulator) error {
+	// There's no error handling in here. I'm not really sure what errors we might need to handle,
+	// so if this ever gets used, it will need improvement.
+	if s.Fmstat {
+		gatherFmstat(s, acc)
+	}
+
+	if s.Fmadm && s.ElevatePrivsWith != "none" {
+		gatherFmadm(acc, s.ElevatePrivsWith)
+	}
+
+	return nil
 }
 
 func init() {

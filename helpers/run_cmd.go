@@ -35,27 +35,14 @@ var RunCmd = func(cmd string) (string, string, error) {
 	return outString, errString, err
 }
 
-// RunCmdPfexec runs a command via pfexec(1), returning its output as a string. Same caveats as
-// RunCmd().
-func RunCmdPfexec(cmd string) (string, string, error) {
-	stdout, stderr, err := RunCmd(fmt.Sprintf("/bin/pfexec %s", cmd))
-
-	return stdout, stderr, err
-}
-
 // RunCmdInZone runs a command via zlogin, unless the given zone is the current zone, in which
-// case it calls RunCmd.
-func RunCmdInZone(cmd string, zone ZoneName) (string, string, error) {
-	var stdout, stderr string
-	var err error
-
-	if zone == CurrentZone() {
-		stdout, stderr, err = RunCmd(cmd)
-	} else {
-		stdout, stderr, err = RunCmd(fmt.Sprintf("/bin/pfexec /usr/sbin/zlogin %s \"%s\"", zone, cmd))
+// case it calls RunCmd. Quoting the command breaks it.
+func RunCmdInZone(prefix string, cmd string, zone ZoneName) (string, string, error) {
+	if zone != CurrentZone() {
+		cmd = fmt.Sprintf("%s /usr/sbin/zlogin %s %s", prefix, zone, cmd)
 	}
 
-	return stdout, stderr, err
+	return RunCmd(cmd)
 }
 
 func HaveFileInZone(file string, zone ZoneName) bool {
