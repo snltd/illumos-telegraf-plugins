@@ -40,18 +40,7 @@ func TestRunCmdDisallowed(t *testing.T) {
 	}
 }
 
-// Don't actually tests the pfexec mechanism. Just assert something happens. The function only
-// concatenates a couple of strings.
-func TestRunCmdPfexecWorks(t *testing.T) {
-	t.Parallel()
-
-	stdout, stderr, err := RunCmdPfexec("/bin/echo something important")
-	require.Equal(t, "something important", stdout)
-	require.Equal(t, "", stderr)
-	require.Nil(t, err)
-}
-
-// Like pfexec, the effort involved in really testing this is too high. Just make sure it fails,
+// The effort involved in properly testing this is too high. Just make sure it fails,
 // and if you're running it in a global zone, as root, with a zone called 'no-such-zone', then
 // you're just out of luck.
 func TestRunCmdZlogin(t *testing.T) {
@@ -59,7 +48,7 @@ func TestRunCmdZlogin(t *testing.T) {
 
 	// This can raise different errors depending on the zone it's run in, and possibly on
 	// privileges, so let's just assert an error.
-	stdout, stderr, err := RunCmdInZone("/bin/date", "no-such-zone")
+	stdout, stderr, err := RunCmdInZone("/bin/pfexec", "/bin/date", "no-such-zone")
 	require.Equal(t, "", stdout)
 	require.NotEqual(t, "", stderr)
 	require.Error(t, err)

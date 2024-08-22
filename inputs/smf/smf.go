@@ -1,6 +1,7 @@
 package smf
 
 import (
+	"fmt"
 	"log"
 	"strings"
 
@@ -15,14 +16,19 @@ var sampleConfig = `
 	## The Zones you wish to examine. If this is unset or empty, all visible zones are counted.
 	# zones = ["zone1", "zone2"]
 	## Whether or not you wish to generate individual, detailed points for services which are in
-	## SvcStates but are not "online"
+	## svc_states but are not "online"
 	# generate_details = true
+	## Use this command to get the elevated privileges svcs requires to observe other zones. 
+	## Should be a path, like "/bin/sudo" "/bin/pfexec", but can also be "none", which will 
+	## collect only the local zone.
+	# elevate_privs_with = "/bin/sudo"
 `
 
 type IllumosSmf struct {
-	SvcStates       []string
-	Zones           []string
-	GenerateDetails bool
+	SvcStates        []string
+	Zones            []string
+	GenerateDetails  bool
+	ElevatePrivsWith string
 }
 
 type svcSummary struct {
@@ -34,6 +40,12 @@ type svcCounts map[string]zoneSvcSummary
 
 type zoneSvcSummary map[string]int
 
+// /bin/svcs -aHZ -ozone,state,fmri
+// serv-wf          online         svc:/network/initial:default
+//
+// /bin/svcs -a -ozone,state,fmri
+// global           online         svc:/network/physical:default
+
 type svcErrs []svcErr
 
 type svcErr struct {
@@ -42,19 +54,29 @@ type svcErr struct {
 	fmri  string
 }
 
-const svcsCmd = "/bin/svcs -aHZ -ozone,state,fmri"
+const (
+	svcsCmdAllZones = "/bin/svcs -aHZ -ozone,state,fmri"
+	svcsCmdThisZone = "/bin/svcs -aH -ozone,state,fmri"
+)
 
 func (s *IllumosSmf) Description() string {
-	return "Aggregates the states of SMF services across a host."
+	return "Reports the states of SMF services for a single zone or across a host."
 }
 
 func (s *IllumosSmf) SampleConfig() string {
 	return sampleConfig
 }
 
-var rawSvcsOutput = func() string {
-	stdout, stderr, err := helpers.RunCmdPfexec(svcsCmd)
+var rawSvcsOutput = func(s IllumosSmf) string {
+	var svcsCmd string
 
+	if s.ElevatePrivsWith == "none" {
+		svcsCmd = svcsCmdThisZone
+	} else {
+		svcsCmd = fmt.Sprintf("%s %s", s.ElevatePrivsWith, svcsCmdAllZones)
+	}
+
+	stdout, stderr, err := helpers.RunCmd(svcsCmd)
 	if err != nil {
 		log.Print(stderr)
 		log.Print(err)
@@ -63,8 +85,50 @@ var rawSvcsOutput = func() string {
 	return stdout
 }
 
+func parseSvcs(s IllumosSmf, raw string) svcSummary {
+	ret := svcSummary{
+		counts:  svcCounts{},
+		svcErrs: svcErrs{},
+	}
+
+	for _, svcLine := range strings.Split(strings.TrimSpace(raw), "\n") {
+		chunks := strings.Fields(svcLine)
+
+		if len(chunks) != 3 {
+			log.Printf("Could not parse svc '%s'", svcLine)
+			continue
+		}
+
+		zone, state, fmri := chunks[0], chunks[1], chunks[2]
+
+		if !helpers.WeWant(zone, s.Zones) || !helpers.WeWant(state, s.SvcStates) {
+			continue
+		}
+
+		_, zoneExists := ret.counts[zone]
+
+		if !zoneExists {
+			ret.counts[zone] = zoneSvcSummary{}
+		}
+
+		_, stateExists := ret.counts[zone][state]
+
+		if !stateExists {
+			ret.counts[zone][state] = 0
+		}
+
+		ret.counts[zone][state]++
+
+		if s.GenerateDetails && state != "online" {
+			ret.svcErrs = append(ret.svcErrs, svcErr{zone, state, fmri})
+		}
+	}
+
+	return ret
+}
+
 func (s *IllumosSmf) Gather(acc telegraf.Accumulator) error {
-	data := parseSvcs(*s, rawSvcsOutput())
+	data := parseSvcs(*s, rawSvcsOutput(*s))
 
 	for zone, stateCounts := range data.counts {
 		for state, count := range stateCounts {
@@ -96,49 +160,6 @@ func (s *IllumosSmf) Gather(acc telegraf.Accumulator) error {
 	}
 
 	return nil
-}
-
-func parseSvcs(s IllumosSmf, raw string) svcSummary {
-	ret := svcSummary{
-		counts:  svcCounts{},
-		svcErrs: svcErrs{},
-	}
-
-	for _, svcLine := range strings.Split(raw, "\n") {
-		chunks := strings.Fields(svcLine)
-
-		if len(chunks) != 3 {
-			log.Printf("could not parse svc '%s'", svcLine)
-
-			continue
-		}
-
-		zone, state, fmri := chunks[0], chunks[1], chunks[2]
-
-		if !helpers.WeWant(zone, s.Zones) || !helpers.WeWant(state, s.SvcStates) {
-			continue
-		}
-
-		_, zoneExists := ret.counts[zone]
-
-		if !zoneExists {
-			ret.counts[zone] = zoneSvcSummary{}
-		}
-
-		_, stateExists := ret.counts[zone][state]
-
-		if !stateExists {
-			ret.counts[zone][state] = 0
-		}
-
-		ret.counts[zone][state]++
-
-		if s.GenerateDetails && state != "online" {
-			ret.svcErrs = append(ret.svcErrs, svcErr{zone, state, fmri})
-		}
-	}
-
-	return ret
 }
 
 func init() {

@@ -14,15 +14,20 @@ Plugin minimum tested version: 1.18
   ## The Zones you wish to examine. If this is unset or empty, all visible zones are counted.
   # zones = ["zone1", "zone2"]
   ## Whether or not you wish to generate individual, detailed points for services which are in
-  ## SvcStates but are not "online"
+  ## svc_states but are not "online"
   # generate_details = true
+  ## Use this command to get the elevated privileges svcs requires to observe other zones. 
+  ## Should be a path, like "/bin/sudo" "/bin/pfexec", but can also be "none", which will 
+  ## collect only the local zone.
+  # elevatePrivsWith = "sudo"
 ```
 
 If it is running in the global zone, this plugin is able to collect SMF
-information for all NGZs. However, the user running Telegraf must have the
-`file_dac_search` `proc_owner` privileges. `pfexec(1)` is used to gather information.
+information for all NGZs, using the `elavatePrivsWith` command. You can use
+`sudo`, assuming a correctly configured `sudoers`, or set up a profile with
+`file_dac_search` and `proc_owner` privileges, and use `pfexec`.
 
-This plugin does not work on Solaris.
+This plugin will not work on Solaris.
 
 ### Metrics
 
