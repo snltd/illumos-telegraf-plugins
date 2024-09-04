@@ -31,8 +31,15 @@ var sampleConfig = `
 `
 
 var runningZones = func() []helpers.ZoneName {
-	zoneMap := helpers.NewZoneMap()
-	return zoneMap.InState("running")
+	zonesOfInterest := []helpers.ZoneName{}
+
+	for zoneName, zoneProps := range helpers.NewZoneMap() {
+		if zoneProps.Status == "running" && zoneProps.Brand != "bhyve" {
+			zonesOfInterest = append(zonesOfInterest, zoneName)
+		}
+	}
+
+	return zonesOfInterest
 }
 
 type IllumosPackages struct {
