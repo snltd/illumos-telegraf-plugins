@@ -40,7 +40,7 @@ type Fmstat struct {
 }
 
 func (s *IllumosFma) Description() string {
-	return `A vague, experimental collector for the Illumos fault management architecture. I'm not
+	return `A vague, experimental collector for the illumos fault management architecture. I'm not
 	sure yet what it is worth recording, and how, so this is almost certainly subject to change`
 }
 
@@ -92,13 +92,13 @@ func gatherFmstat(s *IllumosFma, acc telegraf.Accumulator) {
 }
 
 // I originally wrote this module for Solaris, which provides significantly more information on
-// fmadm faults than Illumos does. Lacking that, I've fallen back to the short form of `fmadm
+// fmadm faults than illumos does. Lacking that, I've fallen back to the short form of `fmadm
 // faulty -arf`. This outputs one fault per line, of the form
 //
 //	zfs://pool=big/vdev=3706b5d93e20f727                                  faulted
 //
 // Problem is, I've only seen that one fault since I wrote this plugin, plus another example I
-// found in the Illumos source! So this function, and
+// found in the illumos source! So this function, and
 // probably the rest of this plugin, could be subject to severe revision.
 // So far as I can tell, impacts are unique, so we send a value of "1" for every impact.
 func gatherFmadm(acc telegraf.Accumulator, cmdPrefix string) {

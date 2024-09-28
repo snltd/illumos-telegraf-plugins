@@ -1,7 +1,7 @@
 package cpu
 
 /*
-Collects information about Illumos CPU usage. The values it outputs are the raw kstat values,
+Collects information about illumos CPU usage. The values it outputs are the raw kstat values,
 which means they are counters, and they only go up. I wrap them in a rate() function in
 Wavefront, which is plenty good enough for me.
 
@@ -24,19 +24,19 @@ import (
 )
 
 var sampleConfig = `
-  ## report stuff from the cpu_info kstat. As of now it's just the current clock speed and some
-	## potentially useful tags
-	# cpu_info_stats = true
-	## Produce metrics for sys and user CPU consumption in every zone
-	# zone_cpu_stats = true
-	## Which cpu:sys kstat metrics you wish to emit. They probably won't all work, because they
-	## some will have a value type which is not an unsigned int
-	# sys_fields = ["cpu_nsec_dtrace", "cpu_nsec_intr", "cpu_nsec_kernel", "cpu_nsec_user"]
-	## "cpu_ticks_idle", cpu_ticks_kernel", cpu_ticks_user", cpu_ticks_wait", }
+  ## Report stuff from the cpu_info kstat. As of now it's just the current clock speed and some
+  ## potentially useful tags
+  # cpu_info_stats = true
+  ## Produce metrics for sys and user CPU consumption in every zone
+  # zone_cpu_stats = true
+  ## Which cpu:sys kstat metrics you wish to emit. They probably won't all work, because they
+  ## some will have a value type which is not an unsigned int
+  # sys_fields = ["cpu_nsec_dtrace", "cpu_nsec_intr", "cpu_nsec_kernel", "cpu_nsec_user"]
+  ## "cpu_ticks_idle", cpu_ticks_kernel", cpu_ticks_user", cpu_ticks_wait", }
 `
 
 func (s *IllumosCPU) Description() string {
-	return "Reports on Illumos CPU usage"
+	return "Reports on illumos CPU usage"
 }
 
 func (s *IllumosCPU) SampleConfig() string {

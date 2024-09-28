@@ -17,7 +17,7 @@ var sampleConfig = `
 `
 
 func (s *IllumosZfsArc) Description() string {
-	return "Reports Illumos ZFS ARC statistics"
+	return "Reports illumos ZFS ARC statistics"
 }
 
 func (s *IllumosZfsArc) SampleConfig() string {

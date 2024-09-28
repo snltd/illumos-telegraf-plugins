@@ -1,10 +1,7 @@
-# Illumos NFS Server Input Plugin
+# illumos NFS Server Input Plugin
 
-Gathers kstat metrics relating to an Illumos system's NFS server. It works with any NFS server ver
-
-The kstat values are reported "raw": that is `crtime` and `snaptime` are not used to calculate
-differentials. Your graphing software should calculate rates, but they will not be as accurate as
-if they were calculated from the high-resolution kstat times.
+Gathers kstat metrics relating to an illumos system's NFS server. It works with
+any NFS server version.
 
 Telegraf minimum version: Telegraf 1.18
 Plugin minimum tested version: 1.18
@@ -12,23 +9,22 @@ Plugin minimum tested version: 1.18
 ### Configuration
 
 ```toml
-	## The NFS versions you wish to monitor.
-	#NfsVersions = ["v3", "v4"]
-	## The kstat fields you wish to emit. 'kstat -p -m nfs -i 0 | grep rfs' will list the
-	## possibilities
-	#Fields = ["read", "write", "remove", "create", "getattr", "setattr"]
+# Reports illumos NFS server statistics
+[[inputs.illumos_nfs_server]]
+  ## The NFS versions you wish to monitor.
+  # nfs_versions = ["v3", "v4"]
+  ## The kstat fields you wish to emit. 'kstat -p -m nfs -i 0 | grep rfsproccnt' lists the
+  ## possibilities
+  # fields = ["read", "write", "remove", "create", "getattr", "setattr"]
 ```
-
-Omitting `Fields` entirely results in all metrics being sent.
 
 ### Metrics
 
 - zpool
-  - tags:
-    - nfsVersion (NFS protocol major version, e.g. "v4")
   - fields:
-    - read (uint64)
-    - ...
+    - selected by user
+  - tags:
+    - nfsVersion (string, NFS protocol major version, e.g. "v4")
 
 The final field of any `nfs:0:rfs*` kstat is a valid field.
 
@@ -37,10 +33,18 @@ The final field of any `nfs:0:rfs*` kstat is a valid field.
 The following queries are written in [The Wavefront Query
 Language](https://docs.wavefront.com/query_language_reference.html).
 
+Write ops for NFSv4
+
 ```
-rate(ts("dev.telegraf.nfs.server.write", nfsVersion="v4")) # write ops for NFSv4
-rate(ts("dev.telegraf.nfs.server.read")) # all reads
+deriv(ts("nfs.server.write", nfsVersion="v4"))
 ```
+
+All reads
+
+```
+deriv(ts("nfs.server.read"))
+```
+
 
 ### Example Output
 

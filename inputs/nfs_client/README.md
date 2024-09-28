@@ -1,14 +1,9 @@
-# Illumos NFS Client Input Plugin
+# illumos NFS Client Input Plugin
 
-Gathers kstat metrics relating to an Illumos system's NFS client traffic. It
+Gathers kstat metrics relating to an illumos system's NFS client traffic. It
 works with any supported NFS protocol version.
 
-The kstat values are reported "raw": that is `crtime` and `snaptime` are not
-used to calculate differentials. Your graphing software should calculate
-rates, but they will not be as accurate as if they were calculated from the
-high-resolution kstat times.
-
-Each zone keeps its own NFS kstats. There's no (simple) way for the global
+Each zone keeps its own NFS kstats. There's no (elegant) way for the global
 zone to see the NFS kstats of an NGZ, so if you care about those, you'll have
 to run a dedicated Telegraf in the zone(s).
 
@@ -18,38 +13,42 @@ Plugin minimum tested version: 1.18
 ### Configuration
 
 ```toml
-	## The NFS versions you wish to monitor.
-	#NfsVersions = ["v3", "v4"]
-	## The kstat fields you wish to emit. 'kstat -p -m nfs -i 0 | grep rfs' lists the possibilities
-	#Fields = ["read", "write", "remove", "create", "getattr", "setattr"]
+# Reports illumos NFS client statistics
+[[inputs.illumos_nfs_client]]
+  ## The NFS versions you wish to monitor
+  # nfs_versions = ["v3", "v4"]
+  ## The kstat fields you wish to emit. 'kstat -p -m nfs -i 0 | grep rfsreqcnt' lists the
+  ## possibilities
+  # fields = ["read", "write", "remove", "create", "getattr", "setattr"]
 ```
 
-Omitting `Fields` entirely results in all metrics being sent.
-
 ### Metrics
-
 - nfs.client
+  - fields:
+    - selected by user 
   - tags:
     - nfsVersion (NFS protocol major version, e.g. "v4")
-  - fields:
-    - read (uint64)
-    - ...
-
-The final field of any `nfs:0:rfs*` kstat is a valid field.
 
 ### Sample Queries
 
 The following queries are written in [The Wavefront Query
 Language](https://docs.wavefront.com/query_language_reference.html).
 
+Write ops for NFSv4
+
 ```
-rate(ts("dev.telegraf.nfs.client.write", nfsVersion="v4")) # write ops for NFSv4
-rate(ts("dev.telegraf.nfs.client.read")) # all reads
+deriv(ts("dev.telegraf.nfs.client.write", nfsVersion="v4"))
+```
+
+All reads
+
+```
+deriv(ts("dev.telegraf.nfs.client.read")) 
 ```
 
 ### Example Output
 
 ```
-> nfs.client,host=cube,nfsVersion=v3 create=0i,getattr=122i,read=194816i,remove=0i,setattr=0i,write=0i 1618958834000000000
-> nfs.client,host=cube,nfsVersion=v4 create=291i,getattr=34952i,read=10793i,remove=1930i,setattr=854i,write=987i 1618958834000000000
+> nfs.client,host=serv,nfsVersion=v3 create=0,getattr=0,read=0,remove=0,setattr=0,write=0 1727452326000000000
+> nfs.client,host=serv,nfsVersion=v4 create=0,getattr=0,read=0,remove=0,setattr=0,write=0 1727452326000000000
 ```

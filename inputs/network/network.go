@@ -11,8 +11,8 @@ import (
 )
 
 var sampleConfig = `
-	## The kstat fields you wish to emit. 'kstat -c net' will show what is collected.  Not defining
-	## any fields sends everything, which is probably not what you want.
+	## The kstat fields you wish to emit. 'kstat -c net' will show what is collected. Defining
+	## no fields sends everything, which is probably not what you want.
 	# fields = ["obytes64", "rbytes64"]
 	## The VNICs you wish to observe. Again, specifying none collects all.
 	# vnics  = ["net0"]
@@ -20,7 +20,7 @@ var sampleConfig = `
 	# zones = ["zone1", "zone2"]`
 
 func (s *IllumosNetwork) Description() string {
-	return "Reports on Illumos NIC Usage. Zone-aware."
+	return "Reports on illumos NIC Usage. Zone-aware."
 }
 
 func (s *IllumosNetwork) SampleConfig() string {

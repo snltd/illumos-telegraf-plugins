@@ -1,6 +1,6 @@
-# Illumos Zpool Input Plugin
+# illumos Zpool Input Plugin
 
-Gathers high-level metrics about the ZFS pools on an Illumos system.
+Gathers high-level metrics about the ZFS pools on an illumos system.
 
 Telegraf minimum version: Telegraf 1.18
 Plugin minimum tested version: 1.18
@@ -8,16 +8,17 @@ Plugin minimum tested version: 1.18
 ### Configuration
 
 ```toml
-[[inputs.example]]
-  ## The metrics you wish to report. They can be any of the headers in the
-  ## output of 'zpool list', and also a numeric interpretation of 'health'.
-  # Fields = ["size", "alloc", "free", "cap", "dedup", "health"]
+# Reports the health and status of ZFS pools.
+[[inputs.illumos_zpool]]
+  ## The metrics you wish to report. They can be any of the headers in the output of 'zpool list',
+  ## and also a numeric interpretation of 'health'.
+  # fields = ["size", "alloc", "free", "cap", "dedup", "health"]
+  ## Status metrics are things like ongoing resilver time, ongoing scrub time, error counts
+  ## and whatnot
+  # status = true
 ```
 
-Omitting `Fields` entirely results in all metrics being sent.
-
 ### Metrics
-
 - zpool
   - tags:
     - name (the pool name)
@@ -53,10 +54,17 @@ Omitting `Fields` entirely results in all metrics being sent.
 The following queries are written in [The Wavefront Query
 Language](https://docs.wavefront.com/query_language_reference.html).
 
+Show the percentage of the root pool in use
+
 ```
-ts("dev.telegraf.zpool.cap", name="rpool") # the percentage of the root pool in use
+ts("zpool.cap", name="rpool")
 ```
 
+Find errant pools, for an alert.
+
+```
+highpass(0, ts("zpool.health"))
+```
 
 ### Example Output
 
