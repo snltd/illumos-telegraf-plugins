@@ -20,7 +20,7 @@ Things to note.
   different KStats to mine, so you may be missing tags in places. I'm thinking
   specifically of disks, but who knows what else.
 * Some of the plugins (e.g. memory) will work on an x86 Solaris system, but
-  some (e.g. SMF) won't. Suck it and see. I'd be delighted to receive  PRs if
+  some (e.g. SMF) won't. Suck it and see. I'd be delighted to receive PRs if
   anyone modifies the code to work right across SunOS.
 * I have no interest in getting any of these plugins merged with the official
   Telegraf distribution. illumos is a serious minority interest these days,
@@ -115,6 +115,10 @@ various `all.go` files. For 1.16.3, I had to take the `starlark` line out of
 
 Once you have a binary, the [`smf` directory](smf) contains just enough SMF to
 get you going.
+
+The top-level `omnios-build` can be copied to the `build` of an 
+[omnios-extra](https://github.com/omniosorg/omnios-extra) fork to automate all 
+the above, producing a proper IPS package with pretty much no effort.
 
 ## The Plugins
 

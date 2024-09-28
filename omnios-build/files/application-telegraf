@@ -1,0 +1,11 @@
+#!/bin/ksh
+
+. /lib/svc/share/smf_include.sh
+
+TELEGRAF=/opt/ooce/bin/telegraf
+CONFIG=/etc/opt/ooce/telegraf/telegraf.conf
+
+$TELEGRAF --config $CONFIG &
+
+exit $SMF_EXIT_OK
+
