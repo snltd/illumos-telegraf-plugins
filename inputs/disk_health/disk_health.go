@@ -23,7 +23,7 @@ var sampleConfig = `
 `
 
 func (s *IllumosDiskHealth) Description() string {
-	return "Reports on Illumos disk errors"
+	return "Reports on illumos disk errors"
 }
 
 func (s *IllumosDiskHealth) SampleConfig() string {

@@ -25,7 +25,7 @@ var sampleConfig = `
 `
 
 func (s *IllumosIO) Description() string {
-	return "Reports on Illumos IO"
+	return "Reports on illumos IO"
 }
 
 func (s *IllumosIO) SampleConfig() string {

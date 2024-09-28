@@ -10,12 +10,12 @@ import (
 )
 
 var sampleConfig = `
-	## The kstat fields you wish to emit. 
-	# Fields = ["open_files"] 
+	## The kstat fields you wish to emit.
+	# Fields = ["open_files"]
 `
 
 func (s *IllumosSmbServer) Description() string {
-	return "Reports Illumos in-kernel SMB server statistics"
+	return "Reports illumos in-kernel SMB server statistics"
 }
 
 func (s *IllumosSmbServer) SampleConfig() string {

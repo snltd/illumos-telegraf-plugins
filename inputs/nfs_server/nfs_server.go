@@ -20,7 +20,7 @@ var sampleConfig = `
 `
 
 func (s *IllumosNfsServer) Description() string {
-	return "Reports Illumos NFS server statistics"
+	return "Reports illumos NFS server statistics"
 }
 
 func (s *IllumosNfsServer) SampleConfig() string {

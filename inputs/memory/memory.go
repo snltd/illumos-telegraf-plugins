@@ -37,7 +37,7 @@ var sampleConfig = `
 var pageSize float64
 
 func (s *IllumosMemory) Description() string {
-	return "Reports on Illumos virtual and physical memory usage."
+	return "Reports on illumos virtual and physical memory usage."
 }
 
 func (s *IllumosMemory) SampleConfig() string {

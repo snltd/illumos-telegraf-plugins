@@ -22,7 +22,7 @@ var sampleConfig = `
 var osRelease = "/etc/os-release"
 
 func (s *IllumosOS) Description() string {
-	return "Reports Illumos operating system information"
+	return "Reports illumos operating system information"
 }
 
 func (s *IllumosOS) SampleConfig() string {
