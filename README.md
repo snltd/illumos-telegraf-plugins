@@ -34,6 +34,9 @@ Things to note.
 
 All of that said, I've found the plugins reliable and useful.
 
+If you want to see some charts of the data they produce, [I put together an 
+illustrated article](https://sysdef.xyz/post/2021-09-11-illumos-telegraf).
+
 ## Building
 
 This isn't a self-contained software package. It's effectively a big patch to
