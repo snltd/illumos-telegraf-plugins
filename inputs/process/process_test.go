@@ -119,6 +119,7 @@ func TestPlugin(t *testing.T) {
 		t,
 		testMetricsFull,
 		acc.GetTelegrafMetrics(),
+		testutil.SortMetrics(),
 		testutil.IgnoreTime())
 }
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"sync"
 
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/inputs"
@@ -128,22 +129,35 @@ func parseSvcs(s IllumosSmf, raw string) svcSummary {
 }
 
 func (s *IllumosSmf) Gather(acc telegraf.Accumulator) error {
+	var wg sync.WaitGroup
+	var mtx sync.Mutex
+
 	data := parseSvcs(*s, rawSvcsOutput(*s))
 
+	// I don't think I trust the accumulator to be thread safe. It's full of
+	// maps.
 	for zone, stateCounts := range data.counts {
-		for state, count := range stateCounts {
-			acc.AddFields(
-				"smf",
-				map[string]interface{}{
-					"states": count,
-				},
-				map[string]string{
-					"zone":  zone,
-					"state": state,
-				},
-			)
-		}
+		wg.Add(1)
+		go func(zone string, stateCounts map[string]int) {
+			defer wg.Done()
+			for state, count := range stateCounts {
+				mtx.Lock()
+				acc.AddFields(
+					"smf",
+					map[string]interface{}{
+						"states": count,
+					},
+					map[string]string{
+						"zone":  zone,
+						"state": state,
+					},
+				)
+				mtx.Unlock()
+			}
+		}(zone, stateCounts)
 	}
+
+	wg.Wait()
 
 	for _, tags := range data.svcErrs {
 		acc.AddFields(
