@@ -21,6 +21,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/inputs"
@@ -332,21 +333,32 @@ func (s *IllumosProcess) Gather(acc telegraf.Accumulator) error {
 		}
 	}
 
-	for _, field := range s.Values {
-		pidList := topKPids(&processMap, field, s.TopK)
+	var wg sync.WaitGroup
+	var mtx sync.Mutex
 
-		for _, pid := range pidList {
-			procObj, ok := processMap[pid]
-			if ok {
-				fields := make(map[string]interface{})
-				val, ok := procObj.Values[field]
+	for _, field := range s.Values {
+		wg.Add(1)
+		go func(field string) {
+			defer wg.Done()
+			pidList := topKPids(&processMap, field, s.TopK)
+
+			for _, pid := range pidList {
+				procObj, ok := processMap[pid]
 				if ok {
-					fields[field] = val.(int64)
-					acc.AddFields("process", fields, procObj.Tags)
+					fields := make(map[string]interface{})
+					val, ok := procObj.Values[field]
+					if ok {
+						fields[field] = val.(int64)
+						mtx.Lock()
+						acc.AddFields("process", fields, procObj.Tags)
+						mtx.Unlock()
+					}
 				}
 			}
-		}
+		}(field)
 	}
+
+	wg.Wait()
 
 	return nil
 }
